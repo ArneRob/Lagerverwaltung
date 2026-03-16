@@ -1,72 +1,92 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lagerverwaltung</title>
   <link rel="stylesheet" href="./lager.css">
 </head>
+
 <body>
 
-<div class="topbar">
-  <div>
-    <div class="app-title">Lagerverwaltung</div>
-    <div class="app-sub" id="sub">Klicke auf ein Fach zum Bearbeiten</div>
-  </div>
-  <div class="actions">
-    <button class="btn" onclick="cycleLayout()">⊞ Raster ändern</button>
-    <button class="btn primary" onclick="openAdd()">+ Fach hinzufügen</button>
-  </div>
-</div>
-
-<div class="stats" id="stats"></div>
-
-<div class="legend">
-  <div class="leg"><div class="dot" style="background:var(--c-leer)"></div>Leer</div>
-  <div class="leg"><div class="dot" style="background:var(--c-voll)"></div>Voll</div>
-  <div class="leg"><div class="dot" style="background:var(--c-gereinigt)"></div>Gereinigt</div>
-  <div class="leg"><div class="dot" style="background:var(--c-wartung)"></div>Wartung</div>
-  <div class="leg"><div class="dot" style="background:var(--c-reserviert)"></div>Reserviert</div>
-</div>
-
-<div class="grid" id="grid"></div>
-
-<!-- Modal -->
-<div class="overlay" id="overlay" onclick="onOverlayClick(event)">
-  <div class="modal">
-    <h3 id="modal-title">Fach bearbeiten</h3>
-    <div class="field">
-      <label>Bezeichnung/Partie</label>
-      <input id="f-name" type="text" placeholder="z.B. Regal A1" />
+  <div class="topbar">
+    <div>
+      <div class="app-title">Lagerverwaltung</div>
+      <div class="app-sub" id="sub">Klicke auf ein Fach zum Bearbeiten</div>
     </div>
-    <div class="field">
-      <label>Status</label>
-      <select id="f-status" class="dropDownMenue">
-        <option value="leer">Leer dreckig</option>
-        <option value="voll">Voll mit Ware</option>
-        <option value="gereinigt">Gereinigt und Leer</option>
-        <option value="reserviert">Reserviert</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Partie</label>
-      <textarea id="f-note" placeholder="z.b...556-125"></textarea>
-    </div>
-    <div class="field">
-      <label>Zuletzt geändert</label>
-      <input id="f-date" type="text" readonly />
-    </div>
-    <div class="modal-actions">
-      <button class="btn danger" id="del-btn" onclick="deleteSlot()">Löschen</button>
-      <button class="btn" onclick="closeModal()">Abbrechen</button>
-      <button class="btn primary" onclick="saveSlot()">Speichern</button>
+    <div class="actions">
+      <button class="btn" onclick="cycleLayout()">⊞ Raster ändern</button>
+      <button class="btn primary" onclick="openAdd()">+ Fach hinzufügen</button>
     </div>
   </div>
-</div>
 
-<div class="toast" id="toast"></div>
+  <div class="stats" id="stats"></div>
 
-<script src="./script.js">
-</script>
+  <div class="legend">
+    <div class="leg">
+      <div class="dot" style="background:var(--c-leer)"></div>Leer
+    </div>
+    <div class="leg">
+      <div class="dot" style="background:var(--c-voll)"></div>Voll
+    </div>
+    <div class="leg">
+      <div class="dot" style="background:var(--c-gereinigt)"></div>Gereinigt
+    </div>
+    <div class="leg">
+      <div class="dot" style="background:var(--c-reserviert)"></div>Reserviert
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <!-- Modal -->
+  <div class="overlay" id="overlay" onclick="onOverlayClick(event)">
+    <div class="modal">
+      <h3 id="modal-title">Fach bearbeiten</h3>
+      <div class="field">
+        <label>Bezeichnung/Partie</label>
+        <input id="f-name" type="text" placeholder="z.B. Regal A1" />
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <div class="custom-select" id="status-dropdown">
+          <button class="cs-trigger" onclick="toggleDropdown(event)" type="button">
+            <span class="cs-label" id="cs-label">Leer</span>
+            <span class="cs-arrow">▾</span>
+          </button>
+          <ul class="cs-list" id="cs-list">
+            <li class="cs-item" data-value="leer" onclick="selectStatus(this)"><span class="badge leer">Leer</span></li>
+            <li class="cs-item" data-value="voll" onclick="selectStatus(this)"><span class="badge voll">Voll mit
+                Ware</span></li>
+            <li class="cs-item" data-value="gereinigt" onclick="selectStatus(this)"><span
+                class="badge gereinigt">Gereinigt</span></li>
+            <li class="cs-item" data-value="reserviert" onclick="selectStatus(this)"><span
+                class="badge reserviert">Reserviert</span></li>
+          </ul>
+        </div>
+        <input type="hidden" id="f-status" />
+      </div>
+      <div class="field">
+        <label>Temperaturen in °C</label>
+        <textarea id="f-note" placeholder="12-15"></textarea>
+      </div>
+      <div class="field">
+        <label>Zuletzt geändert</label>
+        <input id="f-date" type="text" readonly />
+      </div>
+      <div class="modal-actions">
+        <button class="btn danger" id="del-btn" onclick="deleteSlot()">Löschen</button>
+        <button class="btn" onclick="closeModal()">Abbrechen</button>
+        <button class="btn primary" onclick="saveSlot()">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="./script.js">
+  </script>
 </body>
+
 </html>

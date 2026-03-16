@@ -1,147 +1,145 @@
-  /* ═══════════════════════════════════════════════
-     KONSTANTEN & STATE
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   KONSTANTEN & STATE
+═══════════════════════════════════════════════ */
 
-  /** @type {string} localStorage-Schlüssel für die Fächer-Daten */
-  const STORAGE_KEY = 'lager_slots';
+/** @type {string} localStorage-Schlüssel für die Fächer-Daten */
+const STORAGE_KEY = 'lager_slots';
 
-  /** @type {string} localStorage-Schlüssel für den Spalten-Index */
-  const COL_KEY = 'lager_col_idx';
+/** @type {string} localStorage-Schlüssel für den Spalten-Index */
+const COL_KEY = 'lager_col_idx';
 
-  /** @type {number[]} Verfügbare Spaltenanzahlen für das Raster */
-  const COL_OPTIONS = [2, 3, 4, 5, 6];
+/** @type {number[]} Verfügbare Spaltenanzahlen für das Raster */
+const COL_OPTIONS = [2, 3, 4, 5, 6];
 
-  /**
-   * @typedef {Object} Slot
-   * @property {number}  id      - Eindeutige ID
-   * @property {string}  name    - Bezeichnung des Fachs
-   * @property {string}  status  - leer | voll | gereinigt | wartung | reserviert
-   * @property {string}  note    - Freitext / Inhaltsbeschreibung
-   * @property {string}  updated - Zeitstempel der letzten Änderung
-   */
+/**
+ * @typedef {Object} Slot
+ * @property {number}  id      - Eindeutige ID
+ * @property {string}  name    - Bezeichnung des Fachs
+ * @property {string}  note    - Freitext / Inhaltsbeschreibung
+ * @property {string}  updated - Zeitstempel der letzten Änderung
+ */
 
-  /** @type {Slot[]} Alle Fächer im aktuellen Zustand */
-  let slots = [];
+/** @type {Slot[]} Alle Fächer im aktuellen Zustand */
+let slots = [];
 
-  /** @type {number} Nächste zu verwendende ID */
-  let nextId = 1;
+/** @type {number} Nächste zu verwendende ID */
+let nextId = 1;
 
-  /** @type {number|null} ID des gerade bearbeiteten Fachs (null = neues Fach) */
-  let editingId = null;
+/** @type {number|null} ID des gerade bearbeiteten Fachs (null = neues Fach) */
+let editingId = null;
 
-  /** @type {number} Aktueller Index in COL_OPTIONS */
-  let colIdx = 2;
+/** @type {number} Aktueller Index in COL_OPTIONS */
+let colIdx = 2;
 
-  /** @type {Object<string,string>} Anzeigetexte für Status-Werte */
-  const STATUS_LABELS = {
-    leer:       'Leer',
-    voll:       'Voll',
-    gereinigt:  'Gereinigt',
-    wartung:    'Wartung',
+/** @type {Object<string,string>} Anzeigetexte für Status-Werte */
+const STATUS_LABELS = {
+    leer: 'Leer dreckig',
+    voll: 'Voll',
+    gereinigt: 'Gereinigt und Leer',
     reserviert: 'Reserviert',
-  };
+};
 
-  /* ═══════════════════════════════════════════════
-     PERSISTENZ
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   PERSISTENZ
+═══════════════════════════════════════════════ */
 
-  /**
-   * Lädt Fächer und Raster-Einstellung aus dem localStorage.
-   * Sind keine Daten vorhanden, werden Beispiel-Fächer erzeugt.
-   * @returns {void}
-   */
-  function loadFromStorage() {
+/**
+ * Lädt Fächer und Raster-Einstellung aus dem localStorage.
+ * Sind keine Daten vorhanden, werden Beispiel-Fächer erzeugt.
+ * @returns {void}
+ */
+function loadFromStorage() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        slots = JSON.parse(raw);
-        nextId = slots.reduce((max, s) => Math.max(max, s.id), 0) + 1;
-      } else {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            slots = JSON.parse(raw);
+            nextId = slots.reduce((max, s) => Math.max(max, s.id), 0) + 1;
+        } else {
+            slots = defaultSlots();
+            nextId = slots.length + 1;
+        }
+    } catch (e) {
+        console.warn('localStorage lesen fehlgeschlagen:', e);
         slots = defaultSlots();
         nextId = slots.length + 1;
-      }
-    } catch (e) {
-      console.warn('localStorage lesen fehlgeschlagen:', e);
-      slots = defaultSlots();
-      nextId = slots.length + 1;
     }
 
     try {
-      const ci = localStorage.getItem(COL_KEY);
-      if (ci !== null) colIdx = parseInt(ci, 10);
-    } catch (_) {}
-  }
+        const ci = localStorage.getItem(COL_KEY);
+        if (ci !== null) colIdx = parseInt(ci, 10);
+    } catch (_) { }
+}
 
-  /**
-   * Speichert den aktuellen Zustand (Fächer + Spaltenindex) in den localStorage.
-   * @returns {void}
-   */
-  function saveToStorage() {
+/**
+ * Speichert den aktuellen Zustand (Fächer + Spaltenindex) in den localStorage.
+ * @returns {void}
+ */
+function saveToStorage() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(slots));
-      localStorage.setItem(COL_KEY, String(colIdx));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(slots));
+        localStorage.setItem(COL_KEY, String(colIdx));
     } catch (e) {
-      console.warn('localStorage schreiben fehlgeschlagen:', e);
-      showToast('⚠ Speichern fehlgeschlagen – localStorage voll?');
+        console.warn('localStorage schreiben fehlgeschlagen:', e);
+        showToast('⚠ Speichern fehlgeschlagen – localStorage voll?');
     }
-  }
+}
 
-  /**
-   * Gibt die Standard-Beispieldaten zurück, die beim ersten Start geladen werden.
-   * @returns {Slot[]}
-   */
-  function defaultSlots() {
+/**
+ * Gibt die Standard-Beispieldaten zurück, die beim ersten Start geladen werden.
+ * @returns {Slot[]}
+ */
+function defaultSlots() {
     const t = nowTimestamp();
     return [
-      { id: 1, name: 'Regal A1',      status: 'leer',       note: '',                       updated: t },
-      { id: 2, name: 'Regal A2',      status: 'voll',       note: 'Kartons Lieferung KW12', updated: t },
-      { id: 3, name: 'Regal A3',      status: 'gereinigt',  note: 'Grundreinigung fertig',   updated: t },
-      { id: 4, name: 'Regal B1',      status: 'wartung',    note: 'Schiene defekt',          updated: t },
-      { id: 5, name: 'Regal B2',      status: 'reserviert', note: 'Lieferung Montag',        updated: t },
-      { id: 6, name: 'Regal B3',      status: 'leer',       note: '',                       updated: t },
-      { id: 7, name: 'Kühlzone 1',    status: 'voll',       note: 'Tiefkühlware',           updated: t },
-      { id: 8, name: 'Kühlzone 2',    status: 'leer',       note: '',                       updated: t },
-      { id: 9, name: 'Außenlager 1',  status: 'gereinigt',  note: '',                       updated: t },
+        { id: 1, name: 'Regal A1', status: 'leer', note: '', updated: t },
+        { id: 2, name: 'Regal A2', status: 'voll', note: 'Kartons Lieferung KW12', updated: t },
+        { id: 3, name: 'Regal A3', status: 'gereinigt', note: 'Grundreinigung fertig', updated: t },
+        { id: 4, name: 'Regal B1', status: 'gereinigt', note: 'Schiene defekt', updated: t },
+        { id: 5, name: 'Regal B2', status: 'reserviert', note: 'Lieferung Montag', updated: t },
+        { id: 6, name: 'Regal B3', status: 'leer', note: '', updated: t },
+        { id: 7, name: 'Kühlzone 1', status: 'voll', note: 'Tiefkühlware', updated: t },
+        { id: 8, name: 'Kühlzone 2', status: 'leer', note: '', updated: t },
+        { id: 9, name: 'Außenlager 1', status: 'gereinigt', note: '', updated: t },
     ];
-  }
+}
 
-  /* ═══════════════════════════════════════════════
-     HILFSFUNKTIONEN
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   HILFSFUNKTIONEN
+═══════════════════════════════════════════════ */
 
-  /**
-   * Gibt den aktuellen Zeitstempel als lesbaren deutschen String zurück.
-   * @returns {string} z.B. "16.03.2026 14:35"
-   */
-  function nowTimestamp() {
+/**
+ * Gibt den aktuellen Zeitstempel als lesbaren deutschen String zurück.
+ * @returns {string} z.B. "16.03.2026 14:35"
+ */
+function nowTimestamp() {
     const d = new Date();
     return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  }
+        + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
 
-  /**
-   * Zeigt eine kurze Toast-Nachricht am unteren Bildschirmrand.
-   * @param {string} msg - Die anzuzeigende Nachricht
-   * @param {number} [duration=2200] - Anzeigedauer in Millisekunden
-   * @returns {void}
-   */
-  function showToast(msg, duration = 2200) {
+/**
+ * Zeigt eine kurze Toast-Nachricht am unteren Bildschirmrand.
+ * @param {string} msg - Die anzuzeigende Nachricht
+ * @param {number} [duration=2200] - Anzeigedauer in Millisekunden
+ * @returns {void}
+ */
+function showToast(msg, duration = 2200) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), duration);
-  }
+}
 
-  /* ═══════════════════════════════════════════════
-     RENDERING
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   RENDERING
+═══════════════════════════════════════════════ */
 
-  /**
-   * Rendert die Statistik-Karten (Gesamtanzahl + je Status).
-   * @returns {void}
-   */
-  function renderStats() {
-    const counts = { leer: 0, voll: 0, gereinigt: 0, wartung: 0, reserviert: 0 };
+/**
+ * Rendert die Statistik-Karten (Gesamtanzahl + je Status).
+ * @returns {void}
+ */
+function renderStats() {
+    const counts = { leer: 0, voll: 0, gereinigt: 0, reserviert: 0 };
     slots.forEach(s => counts[s.status]++);
 
     document.getElementById('stats').innerHTML = `
@@ -150,7 +148,7 @@
         <div class="stat-lbl">Gesamt</div>
       </div>
       <div class="stat">
-        <div class="stat-val" style="color:var(--c-leer-txt)">${counts.leer}</div>
+        <div class="stat-val" style="color:var(--c-leer-txt)">${counts.leer + counts.gereinigt}</div>
         <div class="stat-lbl">Leer</div>
       </div>
       <div class="stat">
@@ -162,35 +160,39 @@
         <div class="stat-lbl">Gereinigt</div>
       </div>
       <div class="stat">
-        <div class="stat-val" style="color:var(--c-wartung-txt)">${counts.wartung}</div>
-        <div class="stat-lbl">Wartung</div>
+        <div class="stat-val" style="color:var(--c-leer-txt)">${counts.leer}</div>
+        <div class="stat-lbl">Dreckig</div>
+      </div>
+       <div class="stat">
+        <div class="stat-val" style="color:var(--c-reserviert-txt)">${counts.reserviert}</div>
+        <div class="stat-lbl">Reserviert</div>
       </div>
     `;
-  }
+}
 
-  /**
-   * Rendert das Fächer-Raster inklusive "+ Fach hinzufügen"-Kachel.
-   * Die Spaltenanzahl wird aus COL_OPTIONS[colIdx] gelesen.
-   * @returns {void}
-   */
-  function renderGrid() {
+/**
+ * Rendert das Fächer-Raster inklusive "+ Fach hinzufügen"-Kachel.
+ * Die Spaltenanzahl wird aus COL_OPTIONS[colIdx] gelesen.
+ * @returns {void}
+ */
+function renderGrid() {
     const cols = COL_OPTIONS[colIdx];
     const grid = document.getElementById('grid');
     grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
     grid.innerHTML = '';
 
     slots.forEach((sl, i) => {
-      const card = document.createElement('div');
-      card.className = `slot ${sl.status}`;
-      card.innerHTML = `
+        const card = document.createElement('div');
+        card.className = `slot ${sl.status}`;
+        card.innerHTML = `
         <div class="slot-num">Fach ${i + 5}</div>
         <div class="slot-name">${escHtml(sl.name || '(ohne Name)')}</div>
         <div class="badge ${sl.status}">${STATUS_LABELS[sl.status]}</div>
         ${sl.note ? `<div class="slot-info">${escHtml(sl.note)}</div>` : ''}
         <div class="slot-info">${escHtml(sl.updated)}</div>
       `;
-      card.addEventListener('click', () => openEdit(sl.id));
-      grid.appendChild(card);
+        card.addEventListener('click', () => openEdit(sl.id));
+        grid.appendChild(card);
     });
 
     const addBtn = document.createElement('button');
@@ -198,131 +200,131 @@
     addBtn.innerHTML = '<div class="plus">+</div><div>Fach hinzufügen</div>';
     addBtn.addEventListener('click', openAdd);
     grid.appendChild(addBtn);
-  }
+}
 
-  /**
-   * Kombinierter Render-Aufruf für Stats + Grid.
-   * @returns {void}
-   */
-  function render() {
+/**
+ * Kombinierter Render-Aufruf für Stats + Grid.
+ * @returns {void}
+ */
+function render() {
     renderStats();
     renderGrid();
-  }
+}
 
-  /**
-   * Escaped HTML-Sonderzeichen, um XSS zu verhindern.
-   * @param {string} str - Rohtext
-   * @returns {string} Sicherer HTML-String
-   */
-  function escHtml(str) {
+/**
+ * Escaped HTML-Sonderzeichen, um XSS zu verhindern.
+ * @param {string} str - Rohtext
+ * @returns {string} Sicherer HTML-String
+ */
+function escHtml(str) {
     return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
 
-  /* ═══════════════════════════════════════════════
-     LAYOUT
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
 
-  /**
-   * Schaltet die Raster-Spaltenanzahl zyklisch weiter (2 → 3 → 4 → 5 → 6 → 2 …).
-   * Speichert die Auswahl in localStorage.
-   * @returns {void}
-   */
-  function cycleLayout() {
+/**
+ * Schaltet die Raster-Spaltenanzahl zyklisch weiter (2 → 3 → 4 → 5 → 6 → 2 …).
+ * Speichert die Auswahl in localStorage.
+ * @returns {void}
+ */
+function cycleLayout() {
     colIdx = (colIdx + 1) % COL_OPTIONS.length;
     saveToStorage();
     renderGrid();
-  }
+}
 
-  /* ═══════════════════════════════════════════════
-     MODAL
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════ */
 
-  /**
-   * Öffnet das Modal für ein neues Fach (leere Felder).
-   * @returns {void}
-   */
-  function openAdd() {
+/**
+ * Öffnet das Modal für ein neues Fach (leere Felder).
+ * @returns {void}
+ */
+function openAdd() {
     editingId = null;
     document.getElementById('modal-title').textContent = 'Neues Fach';
-    document.getElementById('f-name').value   = '';
-    document.getElementById('f-status').value = 'leer';
-    document.getElementById('f-note').value   = '';
-    document.getElementById('f-date').value   = nowTimestamp();
+    document.getElementById('f-name').value = '';
+    setDropdownValue('leer');
+    document.getElementById('f-note').value = '';
+    document.getElementById('f-date').value = nowTimestamp();
     document.getElementById('del-btn').style.display = 'none';
     document.getElementById('overlay').classList.add('open');
     document.getElementById('f-name').focus();
-  }
+}
 
-  /**
-   * Öffnet das Modal im Bearbeitungsmodus für ein bestehendes Fach.
-   * @param {number} id - ID des zu bearbeitenden Fachs
-   * @returns {void}
-   */
-  function openEdit(id) {
+/**
+ * Öffnet das Modal im Bearbeitungsmodus für ein bestehendes Fach.
+ * @param {number} id - ID des zu bearbeitenden Fachs
+ * @returns {void}
+ */
+function openEdit(id) {
     const sl = slots.find(s => s.id === id);
     if (!sl) return;
     editingId = id;
-    document.getElementById('modal-title').textContent = 'Fach bearbeiten';
-    document.getElementById('f-name').value   = sl.name;
-    document.getElementById('f-status').value = sl.status;
-    document.getElementById('f-note').value   = sl.note;
-    document.getElementById('f-date').value   = sl.updated;
+    document.getElementById('modal-title').textContent = `Fach ${id + 4} bearbeiten`;
+    document.getElementById('f-name').value = sl.name;
+    setDropdownValue(sl.status);
+    document.getElementById('f-note').value = sl.note;
+    document.getElementById('f-date').value = sl.updated;
     document.getElementById('del-btn').style.display = 'inline-block';
     document.getElementById('overlay').classList.add('open');
     document.getElementById('f-name').focus();
-  }
+}
 
-  /**
-   * Schließt das Modal ohne Änderungen zu speichern.
-   * @returns {void}
-   */
-  function closeModal() {
+/**
+ * Schließt das Modal ohne Änderungen zu speichern.
+ * @returns {void}
+ */
+function closeModal() {
     document.getElementById('overlay').classList.remove('open');
-  }
+}
 
-  /**
-   * Schließt das Modal wenn der Klick auf den Overlay-Hintergrund (nicht den Inhalt) trifft.
-   * @param {MouseEvent} event - Das Klick-Event
-   * @returns {void}
-   */
-  function onOverlayClick(event) {
+/**
+ * Schließt das Modal wenn der Klick auf den Overlay-Hintergrund (nicht den Inhalt) trifft.
+ * @param {MouseEvent} event - Das Klick-Event
+ * @returns {void}
+ */
+function onOverlayClick(event) {
     if (event.target.id === 'overlay') closeModal();
-  }
+}
 
-  /**
-   * Speichert das aktuelle Modal-Formular als neues oder bearbeitetes Fach.
-   * Validiert den Namen, aktualisiert localStorage und re-rendert die Ansicht.
-   * @returns {void}
-   */
-  function saveSlot() {
-    const name   = document.getElementById('f-name').value.trim() || 'Neues Fach';
+/**
+ * Speichert das aktuelle Modal-Formular als neues oder bearbeitetes Fach.
+ * Validiert den Namen, aktualisiert localStorage und re-rendert die Ansicht.
+ * @returns {void}
+ */
+function saveSlot() {
+    const name = document.getElementById('f-name').value.trim() || 'Neues Fach';
     const status = document.getElementById('f-status').value;
-    const note   = document.getElementById('f-note').value.trim();
+    const note = document.getElementById('f-note').value.trim();
     const updated = nowTimestamp();
 
     if (editingId !== null) {
-      const sl = slots.find(s => s.id === editingId);
-      if (sl) { sl.name = name; sl.status = status; sl.note = note; sl.updated = updated; }
+        const sl = slots.find(s => s.id === editingId);
+        if (sl) { sl.name = name; sl.status = status; sl.note = note; sl.updated = updated; }
     } else {
-      slots.push({ id: nextId++, name, status, note, updated });
+        slots.push({ id: nextId++, name, status, note, updated });
     }
 
     saveToStorage();
     closeModal();
     render();
     showToast(editingId !== null ? '✓ Fach gespeichert' : '✓ Fach hinzugefügt');
-  }
+}
 
-  /**
-   * Löscht das aktuell im Modal geöffnete Fach nach Bestätigung.
-   * Aktualisiert localStorage und re-rendert die Ansicht.
-   * @returns {void}
-   */
-  function deleteSlot() {
+/**
+ * Löscht das aktuell im Modal geöffnete Fach nach Bestätigung.
+ * Aktualisiert localStorage und re-rendert die Ansicht.
+ * @returns {void}
+ */
+function deleteSlot() {
     if (editingId === null) return;
     const sl = slots.find(s => s.id === editingId);
     const name = sl ? sl.name : 'Fach';
@@ -332,39 +334,77 @@
     closeModal();
     render();
     showToast('🗑 Fach gelöscht');
-  }
+}
 
-  /* ═══════════════════════════════════════════════
-     KEYBOARD
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   KEYBOARD
+═══════════════════════════════════════════════ */
 
-  /**
-   * Globaler Keyboard-Handler:
-   * - Escape schließt das Modal
-   * - Enter im Modal speichert (außer in textarea)
-   * @param {KeyboardEvent} e
-   * @returns {void}
-   */
-  document.addEventListener('keydown', (e) => {
+/**
+ * Globaler Keyboard-Handler:
+ * - Escape schließt das Modal
+ * - Enter im Modal speichert (außer in textarea)
+ * @param {KeyboardEvent} e
+ * @returns {void}
+ */
+document.addEventListener('keydown', (e) => {
     if (!document.getElementById('overlay').classList.contains('open')) return;
     if (e.key === 'Escape') closeModal();
     if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-      e.preventDefault();
-      saveSlot();
+        e.preventDefault();
+        saveSlot();
     }
-  });
+});
 
-  /* ═══════════════════════════════════════════════
-     INIT
-  ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
 
-  /**
-   * Einstiegspunkt: Daten laden und erste Darstellung aufbauen.
-   * @returns {void}
-   */
-  (function init() {
+/**
+ * Einstiegspunkt: Daten laden und erste Darstellung aufbauen.
+ * @returns {void}
+ */
+(function init() {
     loadFromStorage();
     render();
     document.getElementById('sub').textContent =
-      `${slots.length} Fächer geladen · Klicke auf ein Fach zum Bearbeiten`;
-  })();
+        `${slots.length} Fächer geladen · Klicke auf ein Fach zum Bearbeiten`;
+})();
+
+/**
+* Öffnet oder schließt das custom Dropdown.
+* @param {MouseEvent} e
+*/
+function toggleDropdown(e) {
+    e.stopPropagation();
+    document.getElementById('status-dropdown').classList.toggle('open');
+}
+
+/**
+ * Wählt einen Status-Eintrag aus der Liste aus.
+ * Setzt hidden input, Label-Text und markiert die aktive li.
+ * @param {HTMLElement} li - Das geklickte <li>-Element
+ */
+function selectStatus(li) {
+    const value = li.dataset.value;
+    document.getElementById('f-status').value = value;
+    document.getElementById('cs-label').textContent = li.querySelector('.badge').textContent;
+    document.querySelectorAll('.cs-item').forEach(i => i.classList.remove('selected'));
+    li.classList.add('selected');
+    document.getElementById('status-dropdown').classList.remove('open');
+}
+
+/**
+ * Setzt das custom Dropdown auf einen bestimmten Wert.
+ * Wird beim Öffnen des Modals aufgerufen statt .value = ...
+ * @param {string} value - z.B. "leer" | "voll" | ...
+ */
+function setDropdownValue(value) {
+    const li = document.querySelector(`.cs-item[data-value="${value}"]`);
+    if (li) selectStatus(li);
+}
+
+// Dropdown schließen wenn irgendwo anders hingeklickt wird
+document.addEventListener('click', () => {
+    document.getElementById('status-dropdown')?.classList.remove('open');
+});

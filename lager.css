@@ -19,7 +19,7 @@
      --radius-lg: 12px;
      --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-     --c-leer: #5DCAA5;
+     --c-leer: #fa6514;
      --c-leer-bg: #E1F5EE;
      --c-leer-txt: #0F6E56;
      --c-voll: #378ADD;
@@ -28,9 +28,6 @@
      --c-gereinigt: #EF9F27;
      --c-gereinigt-bg: #FAEEDA;
      --c-gereinigt-txt: #854F0B;
-     --c-wartung: #E24B4A;
-     --c-wartung-bg: #FCEBEB;
-     --c-wartung-txt: #A32D2D;
      --c-reserviert: #7F77DD;
      --c-reserviert-bg: #EEEDFE;
      --c-reserviert-txt: #534AB7;
@@ -53,8 +50,6 @@
          --c-voll-txt: #B5D4F4;
          --c-gereinigt-bg: #412402;
          --c-gereinigt-txt: #FAC775;
-         --c-wartung-bg: #501313;
-         --c-wartung-txt: #F7C1C1;
          --c-reserviert-bg: #26215C;
          --c-reserviert-txt: #CECBF6;
      }
@@ -119,9 +114,7 @@
  }
 
  .btn.danger {
-     background: var(--c-wartung-bg);
-     color: var(--c-wartung-txt);
-     border-color: var(--c-wartung-txt);
+    background-color: var(--c-leer);
  }
 
  /* ── stats ── */
@@ -210,10 +203,6 @@
      border: 3px solid var(--c-gereinigt);
  }
 
- .slot.wartung {
-     border: 3px solid var(--c-wartung);
- }
-
  .slot.reserviert {
      border: 3px solid var(--c-reserviert);
  }
@@ -254,11 +243,6 @@
  .badge.gereinigt {
      background: var(--c-gereinigt-bg);
      color: var(--c-gereinigt-txt);
- }
-
- .badge.wartung {
-     background: var(--c-wartung-bg);
-     color: var(--c-wartung-txt);
  }
 
  .badge.reserviert {
@@ -406,3 +390,47 @@
          grid-template-columns: repeat(2, minmax(0, 1fr));
      }
  }
+
+ .custom-select { position: relative; }
+
+.cs-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0.5px solid var(--border-md);
+  border-radius: var(--radius-md);
+  padding: 7px 10px;
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font);
+  cursor: pointer;
+  text-align: left;
+}
+.cs-trigger:hover { background: var(--surface2); }
+.cs-arrow { font-size: 11px; color: var(--text3); transition: transform 0.15s; }
+.custom-select.open .cs-arrow { transform: rotate(180deg); }
+
+.cs-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--surface);
+  border: 0.5px solid var(--border-md);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  list-style: none;
+  z-index: 300;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.custom-select.open .cs-list { display: block; }
+
+.cs-item {
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.cs-item:hover { background: var(--surface2); }
+.cs-item.selected { background: var(--surface2); }
