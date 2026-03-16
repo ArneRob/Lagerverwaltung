@@ -40,9 +40,9 @@ let colIdx = 2;
 
 /** @type {Object<string,string>} Anzeigetexte für Status-Werte */
 const STATUS_LABELS = {
-    leer: 'Leer dreckig',
+    leer: 'Ungereinigt',
     voll: 'Voll',
-    gereinigt: 'Gereinigt und Leer',
+    gereinigt: 'Gereinigt',
     reserviert: 'Reserviert',
 };
 
@@ -155,12 +155,16 @@ function renderStats() {
         <div class="stat-lbl">Gesamt</div>
       </div>
       <div class="stat">
-        <div class="stat-val" style="color:var(--c-leer-txt)">${counts.leer + counts.gereinigt}</div>
-        <div class="stat-lbl">Leer</div>
-      </div>
-      <div class="stat">
         <div class="stat-val" style="color:var(--c-voll-txt)">${counts.voll}</div>
         <div class="stat-lbl">Voll</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--c-reserviert-txt)">${counts.reserviert}</div>
+        <div class="stat-lbl">Reserviert</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--c-leer-txt)">${counts.leer + counts.gereinigt}</div>
+        <div class="stat-lbl">Leer</div>
       </div>
       <div class="stat">
         <div class="stat-val" style="color:var(--c-gereinigt-txt)">${counts.gereinigt}</div>
@@ -168,11 +172,7 @@ function renderStats() {
       </div>
       <div class="stat">
         <div class="stat-val" style="color:var(--c-leer-txt)">${counts.leer}</div>
-        <div class="stat-lbl">Dreckig</div>
-      </div>
-       <div class="stat">
-        <div class="stat-val" style="color:var(--c-reserviert-txt)">${counts.reserviert}</div>
-        <div class="stat-lbl">Reserviert</div>
+        <div class="stat-lbl">Ungereinigt</div>
       </div>
     `;
 }
