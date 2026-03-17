@@ -50,7 +50,21 @@
       </div>
       <div class="field">
         <label>Partie-Nummer</label>
-        <input id="f-name" type="text" placeholder="z.B. 66-1678" />
+        <div class="partie-row">
+          <div class="custom-select partie-dropdown" id="partie-dropdown">
+            <button class="cs-trigger" onclick="togglePartieDropdown(event)" type="button">
+              <span class="cs-label" id="pn-label">Keine vorhanden</span>
+              <span class="cs-arrow">▾</span>
+            </button>
+            <ul class="cs-list" id="pn-list"></ul>
+          </div>
+          <button class="btn" type="button" onclick="openNewPartieInput()">+ Hinzufügen</button>
+        </div>
+        <div class="pn-new-row" id="pn-new-row">
+          <input id="pn-new-input" type="text" placeholder="z.B. 66-1678"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();confirmNewPartie();}" />
+          <button class="btn primary" type="button" onclick="confirmNewPartie()">OK</button>
+        </div>
       </div>
       <div class="field">
         <label>Status</label>

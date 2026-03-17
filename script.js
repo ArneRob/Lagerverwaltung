@@ -39,6 +39,9 @@ let editingId = null;
 /** @type {Object[]} Temperatureinträge des aktuell geöffneten Fachs (Arbeitskopie) */
 let tempEntries = [];
 
+/** @type {Object[]} Partie-Nummern des aktuell geöffneten Fachs (Arbeitskopie) */
+let editingParties = [];
+
 /** @type {number} Aktueller Index in COL_OPTIONS */
 let colIdx = 0;
 
@@ -67,6 +70,9 @@ function loadFromStorage() {
             slots.forEach((s, i) => {
                 if (!s.temperatures) s.temperatures = [];
                 if (s.slotNumber == null) s.slotNumber = i + 5;
+                if (!s.parties) {
+                    s.parties = s.name ? [{ value: s.name, addedAt: s.updated, addedAtMs: 0 }] : [];
+                }
             });
             nextId = slots.reduce((max, s) => Math.max(max, s.id), 0) + 1;
         } else {
@@ -106,15 +112,15 @@ function saveToStorage() {
 function defaultSlots() {
     const t = nowTimestamp();
     return [
-        { id: 1, slotNumber: 5, name: '66-1001', status: 'leer', temperatures: [], updated: t },
-        { id: 2, slotNumber: 6, name: '66-1002', status: 'voll', temperatures: [], updated: t },
-        { id: 3, slotNumber: 7, name: '66-1003', status: 'gereinigt', temperatures: [], updated: t },
-        { id: 4, slotNumber: 8, name: '66-1004', status: 'gereinigt', temperatures: [], updated: t },
-        { id: 5, slotNumber: 9, name: '66-1005', status: 'reserviert', temperatures: [], updated: t },
-        { id: 6, slotNumber: 10, name: '66-1006', status: 'leer', temperatures: [], updated: t },
-        { id: 7, slotNumber: 11, name: '66-1007', status: 'voll', temperatures: [], updated: t },
-        { id: 8, slotNumber: 12, name: '66-1008', status: 'leer', temperatures: [], updated: t },
-        { id: 9, slotNumber: 13, name: '66-1009', status: 'gereinigt', temperatures: [], updated: t },
+        { id: 1, slotNumber: 5,  parties: [{ value: '66-1001', addedAt: t, addedAtMs: 0 }], status: 'leer',      temperatures: [], updated: t },
+        { id: 2, slotNumber: 6,  parties: [{ value: '66-1002', addedAt: t, addedAtMs: 0 }], status: 'voll',      temperatures: [], updated: t },
+        { id: 3, slotNumber: 7,  parties: [{ value: '66-1003', addedAt: t, addedAtMs: 0 }], status: 'gereinigt', temperatures: [], updated: t },
+        { id: 4, slotNumber: 8,  parties: [{ value: '66-1004', addedAt: t, addedAtMs: 0 }], status: 'gereinigt', temperatures: [], updated: t },
+        { id: 5, slotNumber: 9,  parties: [{ value: '66-1005', addedAt: t, addedAtMs: 0 }], status: 'reserviert',temperatures: [], updated: t },
+        { id: 6, slotNumber: 10, parties: [{ value: '66-1006', addedAt: t, addedAtMs: 0 }], status: 'leer',      temperatures: [], updated: t },
+        { id: 7, slotNumber: 11, parties: [{ value: '66-1007', addedAt: t, addedAtMs: 0 }], status: 'voll',      temperatures: [], updated: t },
+        { id: 8, slotNumber: 12, parties: [{ value: '66-1008', addedAt: t, addedAtMs: 0 }], status: 'leer',      temperatures: [], updated: t },
+        { id: 9, slotNumber: 13, parties: [{ value: '66-1009', addedAt: t, addedAtMs: 0 }], status: 'gereinigt', temperatures: [], updated: t },
     ];
 }
 
@@ -199,9 +205,11 @@ function renderGrid() {
     slots.forEach((sl) => {
         const card = document.createElement('div');
         card.className = `slot ${sl.status}`;
+        const lastPartie = sl.parties && sl.parties.length > 0
+            ? sl.parties[sl.parties.length - 1].value : '—';
         card.innerHTML = `
         <div class="slot-num">Fach ${sl.slotNumber}</div>
-        <div class="slot-name">${escHtml(sl.name || '(ohne Name)')}</div>
+        <div class="slot-name">${escHtml(lastPartie)}</div>
         <div class="badge ${sl.status}">${STATUS_LABELS[sl.status]}</div>
         <div class="slot-info">${escHtml(sl.updated)}</div>
       `;
@@ -266,14 +274,15 @@ function openAdd() {
     document.getElementById('modal-title').textContent = 'Neues Fach';
     document.getElementById('f-num').value = '';
     document.getElementById('f-num').readOnly = false;
-    document.getElementById('f-name').value = '';
+    editingParties = [];
+    renderPartieDropdownLabel();
     setDropdownValue('leer');
     tempEntries = [];
     renderTempList();
     document.getElementById('f-date').value = nowTimestamp();
     document.getElementById('del-btn').style.display = 'none';
+    document.getElementById('pn-new-row').style.display = 'none';
     document.getElementById('overlay').classList.add('open');
-    document.getElementById('f-name').focus();
 }
 
 /**
@@ -288,14 +297,15 @@ function openEdit(id) {
     document.getElementById('modal-title').textContent = `Fach ${sl.slotNumber} bearbeiten`;
     document.getElementById('f-num').value = sl.slotNumber;
     document.getElementById('f-num').readOnly = true;
-    document.getElementById('f-name').value = sl.name;
+    editingParties = sl.parties ? sl.parties.map(p => ({ ...p })) : [];
+    renderPartieDropdownLabel();
     setDropdownValue(sl.status);
     tempEntries = sl.temperatures ? [...sl.temperatures] : [];
     renderTempList();
     document.getElementById('f-date').value = sl.updated;
     document.getElementById('del-btn').style.display = 'inline-block';
+    document.getElementById('pn-new-row').style.display = 'none';
     document.getElementById('overlay').classList.add('open');
-    document.getElementById('f-name').focus();
 }
 
 /**
@@ -322,15 +332,19 @@ function onOverlayClick(event) {
  */
 function saveSlot() {
     const slotNumber = parseInt(document.getElementById('f-num').value, 10) || nextId + 4;
-    const name = document.getElementById('f-name').value.trim() || '—';
     const status = document.getElementById('f-status').value;
     const updated = nowTimestamp();
 
+    if (editingParties.length === 0) {
+        showToast('Bitte mindestens eine Partie-Nummer hinzufügen.');
+        return;
+    }
+
     if (editingId !== null) {
         const sl = slots.find(s => s.id === editingId);
-        if (sl) { sl.slotNumber = slotNumber; sl.name = name; sl.status = status; sl.temperatures = tempEntries; sl.updated = updated; }
+        if (sl) { sl.slotNumber = slotNumber; sl.parties = editingParties; sl.status = status; sl.temperatures = tempEntries; sl.updated = updated; }
     } else {
-        slots.push({ id: nextId++, slotNumber, name, status, temperatures: tempEntries, updated });
+        slots.push({ id: nextId++, slotNumber, parties: editingParties, status, temperatures: tempEntries, updated });
     }
 
     saveToStorage();
@@ -347,8 +361,8 @@ function saveSlot() {
 function deleteSlot() {
     if (editingId === null) return;
     const sl = slots.find(s => s.id === editingId);
-    const name = sl ? sl.name : 'Fach';
-    if (!confirm(`"${name}" wirklich löschen?`)) return;
+    const lastName = sl && sl.parties && sl.parties.length > 0 ? sl.parties[sl.parties.length - 1].value : 'Fach';
+    if (!confirm(`"${lastName}" wirklich löschen?`)) return;
     slots = slots.filter(s => s.id !== editingId);
     saveToStorage();
     closeModal();
@@ -370,7 +384,7 @@ function deleteSlot() {
 document.addEventListener('keydown', (e) => {
     if (!document.getElementById('overlay').classList.contains('open')) return;
     if (e.key === 'Escape') closeModal();
-    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.id !== 'pn-new-input') {
         e.preventDefault();
         saveSlot();
     }
@@ -424,10 +438,67 @@ function setDropdownValue(value) {
     if (li) selectStatus(li);
 }
 
-// Dropdown schließen wenn irgendwo anders hingeklickt wird
+// Dropdowns schließen wenn irgendwo anders hingeklickt wird
 document.addEventListener('click', () => {
     document.getElementById('status-dropdown')?.classList.remove('open');
+    document.getElementById('partie-dropdown')?.classList.remove('open');
 });
+
+/* ═══════════════════════════════════════════════
+   PARTIE-NUMMERN
+═══════════════════════════════════════════════ */
+
+function renderPartieDropdownLabel() {
+    const last = editingParties.length > 0
+        ? editingParties[editingParties.length - 1].value
+        : 'Keine vorhanden';
+    document.getElementById('pn-label').textContent = last;
+}
+
+function togglePartieDropdown(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('partie-dropdown');
+    const opening = !dd.classList.contains('open');
+    dd.classList.toggle('open');
+    if (opening) populatePartieList();
+    document.getElementById('pn-new-row').style.display = 'none';
+}
+
+function populatePartieList() {
+    const list = document.getElementById('pn-list');
+    if (editingParties.length === 0) {
+        list.innerHTML = '<li class="pn-empty">Noch keine Partie-Nummern</li>';
+        return;
+    }
+    const reversed = [...editingParties].reverse();
+    list.innerHTML = reversed.map(p =>
+        `<li class="pn-item">${escHtml(p.value)}<span class="pn-item-date">${escHtml(p.addedAt)}</span></li>`
+    ).join('');
+}
+
+function openNewPartieInput() {
+    document.getElementById('partie-dropdown').classList.remove('open');
+    const row = document.getElementById('pn-new-row');
+    row.style.display = 'flex';
+    document.getElementById('pn-new-input').value = '';
+    document.getElementById('pn-new-input').focus();
+}
+
+function confirmNewPartie() {
+    const val = document.getElementById('pn-new-input').value.trim();
+    if (!val) { showToast('Bitte Partie-Nummer eingeben.'); return; }
+    const now = new Date();
+    editingParties.push({
+        value: val,
+        addedAt: now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        addedAtMs: now.getTime(),
+    });
+    document.getElementById('pn-new-row').style.display = 'none';
+    document.getElementById('pn-new-input').value = '';
+    renderPartieDropdownLabel();
+    showToast('✓ Partie-Nummer hinzugefügt');
+}
 
 /* ═══════════════════════════════════════════════
    TEMPERATUR-EINTRÄGE
