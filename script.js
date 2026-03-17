@@ -203,7 +203,7 @@ function renderGrid() {
     grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
     grid.innerHTML = '';
 
-    slots.forEach((sl) => {
+    [...slots].sort((a, b) => a.slotNumber - b.slotNumber).forEach((sl) => {
         const card = document.createElement('div');
         card.className = `slot ${sl.status}`;
         const lastPartie = sl.parties && sl.parties.length > 0
