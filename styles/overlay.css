@@ -105,10 +105,16 @@
 /* ── Modal-Aktionen ── */
 .modal-actions {
     display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
     margin-top: 1rem;
-    flex-wrap: wrap;
+}
+
+.modal-actions-right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
 }
 
 .modal .btn { font-size: 17px; }
