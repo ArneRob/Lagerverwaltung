@@ -69,7 +69,8 @@
       </div>
       <div class="field">
         <label>Temperaturen in °C</label>
-        <textarea id="f-note" placeholder="12-15"></textarea>
+        <div class="temp-list" id="temp-list"></div>
+        <button class="btn temp-add-btn" type="button" onclick="openTempForm()">+ Temperatureintrag hinzufügen</button>
       </div>
       <div class="field">
         <label>Zuletzt geändert</label>
@@ -79,6 +80,35 @@
         <button class="btn danger" id="del-btn" onclick="deleteSlot()">Löschen</button>
         <button class="btn" onclick="closeModal()">Abbrechen</button>
         <button class="btn primary" onclick="saveSlot()">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Temperatur-Formular Overlay -->
+  <div class="overlay" id="temp-overlay" onclick="onTempOverlayClick(event)">
+    <div class="modal">
+      <h3>Temperatureintrag</h3>
+      <div class="field temp-range-row">
+        <div>
+          <label>Temperatur von (°C)</label>
+          <input id="t-von" type="number" step="0.1" placeholder="z.B. 2" />
+        </div>
+        <div>
+          <label>bis (°C)</label>
+          <input id="t-bis" type="number" step="0.1" placeholder="z.B. 8" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Sichtkontrolle</label>
+        <input id="t-sicht" type="text" placeholder="z.B. Schädlinge" />
+      </div>
+      <div class="field">
+        <label>Durchgeführte Maßnahmen</label>
+        <input id="t-massnahmen" type="text" placeholder="z.B. Kühlung aktiviert" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn" type="button" onclick="closeTempForm()">Abbrechen</button>
+        <button class="btn primary" type="button" onclick="saveTempEntry()">Speichern</button>
       </div>
     </div>
   </div>

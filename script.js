@@ -7,6 +7,7 @@ if (localStorage.getItem('lager_auth') !== 'true') {
 
 function logout() {
     localStorage.removeItem('lager_auth');
+    localStorage.removeItem('lager_user');
     window.location.href = 'index.html';
 }
 /** @type {string} localStorage-Schlüssel für die Fächer-Daten */
@@ -35,6 +36,9 @@ let nextId = 1;
 /** @type {number|null} ID des gerade bearbeiteten Fachs (null = neues Fach) */
 let editingId = null;
 
+/** @type {Object[]} Temperatureinträge des aktuell geöffneten Fachs (Arbeitskopie) */
+let tempEntries = [];
+
 /** @type {number} Aktueller Index in COL_OPTIONS */
 let colIdx = 2;
 
@@ -60,6 +64,7 @@ function loadFromStorage() {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
             slots = JSON.parse(raw);
+            slots.forEach(s => { if (!s.temperatures) s.temperatures = []; });
             nextId = slots.reduce((max, s) => Math.max(max, s.id), 0) + 1;
         } else {
             slots = defaultSlots();
@@ -98,15 +103,15 @@ function saveToStorage() {
 function defaultSlots() {
     const t = nowTimestamp();
     return [
-        { id: 1, name: 'Regal A1', status: 'leer', note: '', updated: t },
-        { id: 2, name: 'Regal A2', status: 'voll', note: 'Kartons Lieferung KW12', updated: t },
-        { id: 3, name: 'Regal A3', status: 'gereinigt', note: 'Grundreinigung fertig', updated: t },
-        { id: 4, name: 'Regal B1', status: 'gereinigt', note: 'Schiene defekt', updated: t },
-        { id: 5, name: 'Regal B2', status: 'reserviert', note: 'Lieferung Montag', updated: t },
-        { id: 6, name: 'Regal B3', status: 'leer', note: '', updated: t },
-        { id: 7, name: 'Kühlzone 1', status: 'voll', note: 'Tiefkühlware', updated: t },
-        { id: 8, name: 'Kühlzone 2', status: 'leer', note: '', updated: t },
-        { id: 9, name: 'Außenlager 1', status: 'gereinigt', note: '', updated: t },
+        { id: 1, name: 'Regal A1', status: 'leer', temperatures: [], updated: t },
+        { id: 2, name: 'Regal A2', status: 'voll', temperatures: [], updated: t },
+        { id: 3, name: 'Regal A3', status: 'gereinigt', temperatures: [], updated: t },
+        { id: 4, name: 'Regal B1', status: 'gereinigt', temperatures: [], updated: t },
+        { id: 5, name: 'Regal B2', status: 'reserviert', temperatures: [], updated: t },
+        { id: 6, name: 'Regal B3', status: 'leer', temperatures: [], updated: t },
+        { id: 7, name: 'Kühlzone 1', status: 'voll', temperatures: [], updated: t },
+        { id: 8, name: 'Kühlzone 2', status: 'leer', temperatures: [], updated: t },
+        { id: 9, name: 'Außenlager 1', status: 'gereinigt', temperatures: [], updated: t },
     ];
 }
 
@@ -195,7 +200,6 @@ function renderGrid() {
         <div class="slot-num">Fach ${i + 5}</div>
         <div class="slot-name">${escHtml(sl.name || '(ohne Name)')}</div>
         <div class="badge ${sl.status}">${STATUS_LABELS[sl.status]}</div>
-        ${sl.note ? `<div class="slot-info">${escHtml(sl.note)}</div>` : ''}
         <div class="slot-info">${escHtml(sl.updated)}</div>
       `;
         card.addEventListener('click', () => openEdit(sl.id));
@@ -259,7 +263,8 @@ function openAdd() {
     document.getElementById('modal-title').textContent = 'Neues Fach';
     document.getElementById('f-name').value = '';
     setDropdownValue('leer');
-    document.getElementById('f-note').value = '';
+    tempEntries = [];
+    renderTempList();
     document.getElementById('f-date').value = nowTimestamp();
     document.getElementById('del-btn').style.display = 'none';
     document.getElementById('overlay').classList.add('open');
@@ -278,7 +283,8 @@ function openEdit(id) {
     document.getElementById('modal-title').textContent = `Fach ${id + 4} bearbeiten`;
     document.getElementById('f-name').value = sl.name;
     setDropdownValue(sl.status);
-    document.getElementById('f-note').value = sl.note;
+    tempEntries = sl.temperatures ? [...sl.temperatures] : [];
+    renderTempList();
     document.getElementById('f-date').value = sl.updated;
     document.getElementById('del-btn').style.display = 'inline-block';
     document.getElementById('overlay').classList.add('open');
@@ -310,14 +316,13 @@ function onOverlayClick(event) {
 function saveSlot() {
     const name = document.getElementById('f-name').value.trim() || 'Neues Fach';
     const status = document.getElementById('f-status').value;
-    const note = document.getElementById('f-note').value.trim();
     const updated = nowTimestamp();
 
     if (editingId !== null) {
         const sl = slots.find(s => s.id === editingId);
-        if (sl) { sl.name = name; sl.status = status; sl.note = note; sl.updated = updated; }
+        if (sl) { sl.name = name; sl.status = status; sl.temperatures = tempEntries; sl.updated = updated; }
     } else {
-        slots.push({ id: nextId++, name, status, note, updated });
+        slots.push({ id: nextId++, name, status, temperatures: tempEntries, updated });
     }
 
     saveToStorage();
@@ -415,3 +420,97 @@ function setDropdownValue(value) {
 document.addEventListener('click', () => {
     document.getElementById('status-dropdown')?.classList.remove('open');
 });
+
+/* ═══════════════════════════════════════════════
+   TEMPERATUR-EINTRÄGE
+═══════════════════════════════════════════════ */
+
+const SICHT_LABELS = { ok: 'OK', schaedling: 'Schädlingsbefall', schimmel: 'Schimmel' };
+
+function toggleTempEntry(el) {
+    el.classList.toggle('open');
+}
+
+function isTempLocked(entry) {
+    return Date.now() - entry.savedAtMs > 60000;
+}
+
+function renderTempList() {
+    const list = document.getElementById('temp-list');
+    if (!list) return;
+    if (tempEntries.length === 0) {
+        list.innerHTML = '<div class="temp-empty">Noch keine Einträge</div>';
+        return;
+    }
+    list.innerHTML = tempEntries.map((e) => {
+        const locked = isTempLocked(e);
+        return `
+          <div class="temp-entry${locked ? ' temp-locked' : ''}" onclick="toggleTempEntry(this)">
+            <div class="temp-entry-preview">
+              <span class="temp-preview-range">${e.von}°C – ${e.bis}°C</span>
+              <span class="temp-preview-date">${escHtml(e.savedAtDisplay)}</span>
+            </div>
+            <div class="temp-entry-details">
+              <div class="temp-detail-row"><span class="temp-detail-lbl">Sichtkontrolle</span><span>${escHtml(e.sicht)}</span></div>
+              <div class="temp-detail-row"><span class="temp-detail-lbl">Maßnahmen</span><span>${escHtml(e.massnahmen)}</span></div>
+              <div class="temp-entry-meta">
+                <span>${escHtml(e.savedAtDisplay)}</span>
+                <span>${escHtml(e.savedBy)}</span>
+              </div>
+            </div>
+          </div>`;
+    }).join('');
+}
+
+function openTempForm() {
+    document.getElementById('t-von').value = '';
+    document.getElementById('t-bis').value = '';
+    document.getElementById('t-sicht').value = '';
+    document.getElementById('t-massnahmen').value = '';
+    document.getElementById('temp-overlay').classList.add('open');
+    document.getElementById('t-von').focus();
+}
+
+function closeTempForm() {
+    document.getElementById('temp-overlay').classList.remove('open');
+}
+
+function onTempOverlayClick(event) {
+    if (event.target.id === 'temp-overlay') closeTempForm();
+}
+
+function saveTempEntry() {
+    const von = parseFloat(document.getElementById('t-von').value);
+    const bis = parseFloat(document.getElementById('t-bis').value);
+    const sicht = document.getElementById('t-sicht').value.trim();
+    const massnahmen = document.getElementById('t-massnahmen').value.trim();
+    if (isNaN(von) || document.getElementById('t-von').value === '') {
+        showToast('Bitte Temperatur "von" eingeben.');
+        return;
+    }
+    if (isNaN(bis) || document.getElementById('t-bis').value === '') {
+        showToast('Bitte Temperatur "bis" eingeben.');
+        return;
+    }
+    if (!sicht) {
+        showToast('Bitte Sichtkontrolle eingeben.');
+        return;
+    }
+    if (!massnahmen) {
+        showToast('Bitte durchgeführte Maßnahmen eingeben.');
+        return;
+    }
+    const now = new Date();
+    tempEntries.push({
+        von,
+        bis,
+        sicht,
+        massnahmen,
+        savedBy: localStorage.getItem('lager_user') || 'Unbekannt',
+        savedAtMs: now.getTime(),
+        savedAtDisplay: now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    });
+    closeTempForm();
+    renderTempList();
+}

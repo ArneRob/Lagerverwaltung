@@ -18,6 +18,7 @@ function doLogin() {
     const match = USERS.find(u => u.username === user && u.password === pass);
     if (match) {
         localStorage.setItem(AUTH_KEY, 'true');
+        localStorage.setItem('lager_user', match.username);
         goToApp();
     } else {
         showError();

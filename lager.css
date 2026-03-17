@@ -458,3 +458,144 @@
  .cs-item.selected {
      background: var(--surface2);
  }
+
+/* ── modal max-height ── */
+.modal {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ── Temperaturliste im Modal ── */
+.temp-list {
+    max-height: 100px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.temp-empty {
+    font-size: 12px;
+    color: var(--text3);
+    padding: 6px 2px;
+}
+
+.temp-entry {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.temp-entry:hover {
+    border-color: var(--border-md);
+}
+
+.temp-locked {
+    opacity: 0.8;
+}
+
+.temp-entry-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.temp-preview-range {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.temp-preview-date {
+    font-size: 11px;
+    color: var(--text3);
+}
+
+.temp-entry-details {
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 0.5px solid var(--border);
+}
+
+.temp-entry.open .temp-entry-details {
+    display: block;
+}
+
+.temp-detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 4px;
+}
+
+.temp-detail-lbl {
+    color: var(--text3);
+}
+
+.temp-entry-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text3);
+    border-top: 0.5px solid var(--border);
+    padding-top: 5px;
+    margin-top: 6px;
+}
+
+/* ── Sichtkontrolle Inline-Badge ── */
+.sicht-inline {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+.sicht-ok {
+    background: var(--c-leer-bg);
+    color: var(--c-leer-txt);
+}
+
+.sicht-schaedling {
+    background: var(--c-gereinigt-bg);
+    color: var(--c-gereinigt-txt);
+}
+
+.sicht-schimmel {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+    .sicht-schimmel {
+        background: #450a0a;
+        color: #f87171;
+    }
+}
+
+/* ── Temperatur-Formular ── */
+.temp-add-btn {
+    width: 100%;
+    border-style: dashed;
+    color: var(--text2);
+    text-align: center;
+    font-size: 12px;
+}
+
+.temp-range-row {
+    display: flex;
+    gap: 10px;
+}
+
+.temp-range-row > div {
+    flex: 1;
+}
+
+/* ── temp-overlay über main overlay ── */
+#temp-overlay {
+    z-index: 210;
+}
