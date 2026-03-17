@@ -17,7 +17,7 @@ const STORAGE_KEY = 'lager_slots';
 const COL_KEY = 'lager_col_idx';
 
 /** @type {number[]} Verfügbare Spaltenanzahlen für das Raster */
-const COL_OPTIONS = [2, 3, 4, 5, 6];
+const COL_OPTIONS = [2, 3];
 
 /**
  * @typedef {Object} Slot
@@ -40,7 +40,7 @@ let editingId = null;
 let tempEntries = [];
 
 /** @type {number} Aktueller Index in COL_OPTIONS */
-let colIdx = 2;
+let colIdx = 0;
 
 /** @type {Object<string,string>} Anzeigetexte für Status-Werte */
 const STATUS_LABELS = {
@@ -64,7 +64,10 @@ function loadFromStorage() {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
             slots = JSON.parse(raw);
-            slots.forEach(s => { if (!s.temperatures) s.temperatures = []; });
+            slots.forEach((s, i) => {
+                if (!s.temperatures) s.temperatures = [];
+                if (s.slotNumber == null) s.slotNumber = i + 5;
+            });
             nextId = slots.reduce((max, s) => Math.max(max, s.id), 0) + 1;
         } else {
             slots = defaultSlots();
@@ -103,15 +106,15 @@ function saveToStorage() {
 function defaultSlots() {
     const t = nowTimestamp();
     return [
-        { id: 1, name: 'Regal A1', status: 'leer', temperatures: [], updated: t },
-        { id: 2, name: 'Regal A2', status: 'voll', temperatures: [], updated: t },
-        { id: 3, name: 'Regal A3', status: 'gereinigt', temperatures: [], updated: t },
-        { id: 4, name: 'Regal B1', status: 'gereinigt', temperatures: [], updated: t },
-        { id: 5, name: 'Regal B2', status: 'reserviert', temperatures: [], updated: t },
-        { id: 6, name: 'Regal B3', status: 'leer', temperatures: [], updated: t },
-        { id: 7, name: 'Kühlzone 1', status: 'voll', temperatures: [], updated: t },
-        { id: 8, name: 'Kühlzone 2', status: 'leer', temperatures: [], updated: t },
-        { id: 9, name: 'Außenlager 1', status: 'gereinigt', temperatures: [], updated: t },
+        { id: 1, slotNumber: 5, name: '66-1001', status: 'leer', temperatures: [], updated: t },
+        { id: 2, slotNumber: 6, name: '66-1002', status: 'voll', temperatures: [], updated: t },
+        { id: 3, slotNumber: 7, name: '66-1003', status: 'gereinigt', temperatures: [], updated: t },
+        { id: 4, slotNumber: 8, name: '66-1004', status: 'gereinigt', temperatures: [], updated: t },
+        { id: 5, slotNumber: 9, name: '66-1005', status: 'reserviert', temperatures: [], updated: t },
+        { id: 6, slotNumber: 10, name: '66-1006', status: 'leer', temperatures: [], updated: t },
+        { id: 7, slotNumber: 11, name: '66-1007', status: 'voll', temperatures: [], updated: t },
+        { id: 8, slotNumber: 12, name: '66-1008', status: 'leer', temperatures: [], updated: t },
+        { id: 9, slotNumber: 13, name: '66-1009', status: 'gereinigt', temperatures: [], updated: t },
     ];
 }
 
@@ -193,11 +196,11 @@ function renderGrid() {
     grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
     grid.innerHTML = '';
 
-    slots.forEach((sl, i) => {
+    slots.forEach((sl) => {
         const card = document.createElement('div');
         card.className = `slot ${sl.status}`;
         card.innerHTML = `
-        <div class="slot-num">Fach ${i + 5}</div>
+        <div class="slot-num">Fach ${sl.slotNumber}</div>
         <div class="slot-name">${escHtml(sl.name || '(ohne Name)')}</div>
         <div class="badge ${sl.status}">${STATUS_LABELS[sl.status]}</div>
         <div class="slot-info">${escHtml(sl.updated)}</div>
@@ -261,6 +264,8 @@ function cycleLayout() {
 function openAdd() {
     editingId = null;
     document.getElementById('modal-title').textContent = 'Neues Fach';
+    document.getElementById('f-num').value = '';
+    document.getElementById('f-num').readOnly = false;
     document.getElementById('f-name').value = '';
     setDropdownValue('leer');
     tempEntries = [];
@@ -280,7 +285,9 @@ function openEdit(id) {
     const sl = slots.find(s => s.id === id);
     if (!sl) return;
     editingId = id;
-    document.getElementById('modal-title').textContent = `Fach ${id + 4} bearbeiten`;
+    document.getElementById('modal-title').textContent = `Fach ${sl.slotNumber} bearbeiten`;
+    document.getElementById('f-num').value = sl.slotNumber;
+    document.getElementById('f-num').readOnly = true;
     document.getElementById('f-name').value = sl.name;
     setDropdownValue(sl.status);
     tempEntries = sl.temperatures ? [...sl.temperatures] : [];
@@ -314,15 +321,16 @@ function onOverlayClick(event) {
  * @returns {void}
  */
 function saveSlot() {
-    const name = document.getElementById('f-name').value.trim() || 'Neues Fach';
+    const slotNumber = parseInt(document.getElementById('f-num').value, 10) || nextId + 4;
+    const name = document.getElementById('f-name').value.trim() || '—';
     const status = document.getElementById('f-status').value;
     const updated = nowTimestamp();
 
     if (editingId !== null) {
         const sl = slots.find(s => s.id === editingId);
-        if (sl) { sl.name = name; sl.status = status; sl.temperatures = tempEntries; sl.updated = updated; }
+        if (sl) { sl.slotNumber = slotNumber; sl.name = name; sl.status = status; sl.temperatures = tempEntries; sl.updated = updated; }
     } else {
-        slots.push({ id: nextId++, name, status, temperatures: tempEntries, updated });
+        slots.push({ id: nextId++, slotNumber, name, status, temperatures: tempEntries, updated });
     }
 
     saveToStorage();
