@@ -9,15 +9,15 @@
 </head>
 
 <body>
-  <button class="btn" onclick="logout()">Abmelden</button>
+  <button class="btn" id="logout-btn">Abmelden</button>
   <div class="topbar">
     <div>
       <div class="app-title">Lagerverwaltung</div>
       <div class="app-sub" id="sub">Klicke auf ein Fach zum Bearbeiten</div>
     </div>
     <div class="actions">
-      <button class="btn" onclick="cycleLayout()">⊞ Raster ändern</button>
-      <button class="btn primary" onclick="openAdd()">+ Fach hinzufügen</button>
+      <button class="btn" id="layout-btn">⊞ Raster ändern</button>
+      <button class="btn primary" id="add-btn">+ Fach hinzufügen</button>
     </div>
   </div>
 
@@ -41,7 +41,7 @@
   <div class="grid" id="grid"></div>
 
   <!-- Modal -->
-  <div class="overlay" id="overlay" onclick="onOverlayClick(event)">
+  <div class="overlay" id="overlay">
     <div class="modal">
       <h3 id="modal-title">Fach bearbeiten</h3>
       <div class="field">
@@ -52,35 +52,31 @@
         <label>Partie-Nummer</label>
         <div class="partie-row">
           <div class="custom-select partie-dropdown" id="partie-dropdown">
-            <button class="cs-trigger" onclick="togglePartieDropdown(event)" type="button">
+            <button class="cs-trigger" id="partie-trigger" type="button">
               <span class="cs-label" id="pn-label">Keine vorhanden</span>
               <span class="cs-arrow">▾</span>
             </button>
             <ul class="cs-list" id="pn-list"></ul>
           </div>
-          <button class="btn" type="button" onclick="openNewPartieInput()">+ Hinzufügen</button>
+          <button class="btn" type="button" id="partie-add-btn">+ Hinzufügen</button>
         </div>
         <div class="pn-new-row" id="pn-new-row">
-          <input id="pn-new-input" type="text" placeholder="z.B. 66-1678"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();confirmNewPartie();}" />
-          <button class="btn primary" type="button" onclick="confirmNewPartie()">OK</button>
+          <input id="pn-new-input" type="text" placeholder="z.B. 66-1678" />
+          <button class="btn primary" type="button" id="pn-ok-btn">OK</button>
         </div>
       </div>
       <div class="field">
         <label>Status</label>
         <div class="custom-select" id="status-dropdown">
-          <button class="cs-trigger" onclick="toggleDropdown(event)" type="button">
+          <button class="cs-trigger" id="status-trigger" type="button">
             <span class="cs-label" id="cs-label">Leer</span>
             <span class="cs-arrow">▾</span>
           </button>
           <ul class="cs-list" id="cs-list">
-            <li class="cs-item" data-value="leer" onclick="selectStatus(this)"><span class="badge leer">Leer</span></li>
-            <li class="cs-item" data-value="voll" onclick="selectStatus(this)"><span class="badge voll">Voll mit
-                Ware</span></li>
-            <li class="cs-item" data-value="gereinigt" onclick="selectStatus(this)"><span
-                class="badge gereinigt">Gereinigt</span></li>
-            <li class="cs-item" data-value="reserviert" onclick="selectStatus(this)"><span
-                class="badge reserviert">Reserviert</span></li>
+            <li class="cs-item" data-value="leer"><span class="badge leer">Leer</span></li>
+            <li class="cs-item" data-value="voll"><span class="badge voll">Voll mit Ware</span></li>
+            <li class="cs-item" data-value="gereinigt"><span class="badge gereinigt">Gereinigt</span></li>
+            <li class="cs-item" data-value="reserviert"><span class="badge reserviert">Reserviert</span></li>
           </ul>
         </div>
         <input type="hidden" id="f-status" />
@@ -88,24 +84,24 @@
       <div class="field">
         <label>Temperaturen in °C</label>
         <div class="temp-list" id="temp-list"></div>
-        <button class="btn temp-add-btn" type="button" onclick="openTempForm()">+ Temperatureintrag hinzufügen</button>
+        <button class="btn temp-add-btn" type="button" id="temp-add-btn">+ Temperatureintrag hinzufügen</button>
       </div>
       <div class="field">
         <label>Zuletzt geändert</label>
         <input id="f-date" type="text" readonly />
       </div>
       <div class="modal-actions">
-        <button class="btn danger" id="del-btn" onclick="deleteSlot()">Löschen</button>
+        <button class="btn danger" id="del-btn">Löschen</button>
         <div class="modal-actions-right">
-          <button class="btn" onclick="closeModal()">Abbrechen</button>
-          <button class="btn primary" onclick="saveSlot()">Speichern</button>
+          <button class="btn" id="modal-cancel-btn">Abbrechen</button>
+          <button class="btn primary" id="modal-save-btn">Speichern</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Temperatur-Formular Overlay -->
-  <div class="overlay" id="temp-overlay" onclick="onTempOverlayClick(event)">
+  <div class="overlay" id="temp-overlay">
     <div class="modal">
       <h3>Temperatureintrag</h3>
       <div class="field temp-range-row">
@@ -127,17 +123,15 @@
         <input id="t-massnahmen" type="text" placeholder="z.B. Kühlung aktiviert" />
       </div>
       <div class="modal-actions">
-        <button class="btn" type="button" onclick="closeTempForm()">Abbrechen</button>
-        <button class="btn primary" type="button" onclick="saveTempEntry()">Speichern</button>
+        <button class="btn" type="button" id="temp-cancel-btn">Abbrechen</button>
+        <button class="btn primary" type="button" id="temp-save-btn">Speichern</button>
       </div>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
-  <script src="./scripts/utils.js" defer></script>
-  <script src="./scripts/temperature.js" defer></script>
-  <script src="./scripts/ui.js" defer></script>
+  <script type="module" src="./scripts/ui.js"></script>
 </body>
 
 </html>

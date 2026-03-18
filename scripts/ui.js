@@ -1,14 +1,18 @@
+import { escHtml, showToast, nowTimestamp, logout } from './utils.js';
+import { state, COL_OPTIONS, STATUS_LABELS, loadFromStorage, saveToStorage } from './state.js';
+import { renderTempList, openTempForm, closeTempForm, saveTempEntry, toggleTempEntry } from './temperature.js';
+
 /* ═══════════════════════════════════════════════
    RENDERING
 ═══════════════════════════════════════════════ */
 
 function renderStats() {
     const counts = { leer: 0, voll: 0, gereinigt: 0, reserviert: 0 };
-    slots.forEach(s => counts[s.status]++);
+    state.slots.forEach(s => counts[s.status]++);
 
     document.getElementById('stats').innerHTML = `
       <div class="stat">
-        <div class="stat-val">${slots.length}</div>
+        <div class="stat-val">${state.slots.length}</div>
         <div class="stat-lbl">Gesamt</div>
       </div>
       <div class="stat">
@@ -35,12 +39,12 @@ function renderStats() {
 }
 
 function renderGrid() {
-    const cols = COL_OPTIONS[colIdx];
+    const cols = COL_OPTIONS[state.colIdx];
     const grid = document.getElementById('grid');
     grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
     grid.innerHTML = '';
 
-    [...slots].sort((a, b) => a.slotNumber - b.slotNumber).forEach((sl) => {
+    [...state.slots].sort((a, b) => a.slotNumber - b.slotNumber).forEach((sl) => {
         const card = document.createElement('div');
         card.className = `slot ${sl.status}`;
         const lastPartie = sl.parties && sl.parties.length > 0
@@ -68,7 +72,7 @@ function render() {
 }
 
 function cycleLayout() {
-    colIdx = (colIdx + 1) % COL_OPTIONS.length;
+    state.colIdx = (state.colIdx + 1) % COL_OPTIONS.length;
     saveToStorage();
     renderGrid();
 }
@@ -78,14 +82,14 @@ function cycleLayout() {
 ═══════════════════════════════════════════════ */
 
 function openAdd() {
-    editingId = null;
+    state.editingId = null;
     document.getElementById('modal-title').innerHTML =
         'Fach <input id="f-num" class="title-num-input" type="number" min="1" placeholder="Nr." />';
     document.getElementById('f-frucht').value = '';
-    editingParties = [];
+    state.editingParties = [];
     renderPartieDropdownLabel();
     setDropdownValue('leer');
-    tempEntries = [];
+    state.tempEntries = [];
     renderTempList();
     document.getElementById('f-date').value = nowTimestamp();
     document.getElementById('del-btn').style.display = 'none';
@@ -95,15 +99,15 @@ function openAdd() {
 }
 
 function openEdit(id) {
-    const sl = slots.find(s => s.id === id);
+    const sl = state.slots.find(s => s.id === id);
     if (!sl) return;
-    editingId = id;
+    state.editingId = id;
     document.getElementById('modal-title').textContent = `Fach ${sl.slotNumber}`;
     document.getElementById('f-frucht').value = sl.fruchtart || '';
-    editingParties = sl.parties ? sl.parties.map(p => ({ ...p })) : [];
+    state.editingParties = sl.parties ? sl.parties.map(p => ({ ...p })) : [];
     renderPartieDropdownLabel();
     setDropdownValue(sl.status);
-    tempEntries = sl.temperatures ? [...sl.temperatures] : [];
+    state.tempEntries = sl.temperatures ? [...sl.temperatures] : [];
     renderTempList();
     document.getElementById('f-date').value = sl.updated;
     document.getElementById('del-btn').style.display = 'inline-block';
@@ -115,50 +119,50 @@ function closeModal() {
     document.getElementById('overlay').classList.remove('open');
 }
 
-function onOverlayClick(event) {
-    if (event.target.id === 'overlay') closeModal();
-}
-
 function saveSlot() {
-    const numInput = document.getElementById('f-num');
-    const slotNumber = editingId !== null
-        ? slots.find(s => s.id === editingId)?.slotNumber
-        : (parseInt(numInput?.value, 10) || nextId + 4);
+    const numInput   = document.getElementById('f-num');
+    const slotNumber = state.editingId !== null
+        ? state.slots.find(s => s.id === state.editingId)?.slotNumber
+        : (parseInt(numInput?.value, 10) || state.nextId + 4);
     const fruchtart = document.getElementById('f-frucht').value.trim();
-    const status = document.getElementById('f-status').value;
-    const updated = nowTimestamp();
+    const status    = document.getElementById('f-status').value;
+    const updated   = nowTimestamp();
 
-    if (editingParties.length === 0) {
+    if (state.editingParties.length === 0) {
         showToast('Bitte mindestens eine Partie-Nummer hinzufügen.');
         return;
     }
 
-    if (editingId !== null) {
-        const sl = slots.find(s => s.id === editingId);
+    if (state.editingId !== null) {
+        const sl = state.slots.find(s => s.id === state.editingId);
         if (sl) {
-            sl.parties = editingParties;
-            sl.fruchtart = fruchtart;
-            sl.status = status;
-            sl.temperatures = tempEntries;
-            sl.updated = updated;
+            sl.parties      = state.editingParties;
+            sl.fruchtart    = fruchtart;
+            sl.status       = status;
+            sl.temperatures = state.tempEntries;
+            sl.updated      = updated;
         }
     } else {
-        slots.push({ id: nextId++, slotNumber, fruchtart, parties: editingParties, status, temperatures: tempEntries, updated });
+        state.slots.push({
+            id: state.nextId++, slotNumber, fruchtart,
+            parties: state.editingParties, status,
+            temperatures: state.tempEntries, updated,
+        });
     }
 
     saveToStorage();
     closeModal();
     render();
-    showToast(editingId !== null ? '✓ Fach gespeichert' : '✓ Fach hinzugefügt');
+    showToast(state.editingId !== null ? '✓ Fach gespeichert' : '✓ Fach hinzugefügt');
 }
 
 function deleteSlot() {
-    if (editingId === null) return;
-    const sl = slots.find(s => s.id === editingId);
+    if (state.editingId === null) return;
+    const sl       = state.slots.find(s => s.id === state.editingId);
     const lastName = sl && sl.parties && sl.parties.length > 0
         ? sl.parties[sl.parties.length - 1].value : 'Fach';
     if (!confirm(`"${lastName}" wirklich löschen?`)) return;
-    slots = slots.filter(s => s.id !== editingId);
+    state.slots = state.slots.filter(s => s.id !== state.editingId);
     saveToStorage();
     closeModal();
     render();
@@ -193,15 +197,15 @@ function setDropdownValue(value) {
 ═══════════════════════════════════════════════ */
 
 function renderPartieDropdownLabel() {
-    const last = editingParties.length > 0
-        ? editingParties[editingParties.length - 1].value
+    const last = state.editingParties.length > 0
+        ? state.editingParties[state.editingParties.length - 1].value
         : 'Keine vorhanden';
     document.getElementById('pn-label').textContent = last;
 }
 
 function togglePartieDropdown(e) {
     e.stopPropagation();
-    const dd = document.getElementById('partie-dropdown');
+    const dd      = document.getElementById('partie-dropdown');
     const opening = !dd.classList.contains('open');
     dd.classList.toggle('open');
     if (opening) populatePartieList();
@@ -210,11 +214,11 @@ function togglePartieDropdown(e) {
 
 function populatePartieList() {
     const list = document.getElementById('pn-list');
-    if (editingParties.length === 0) {
+    if (state.editingParties.length === 0) {
         list.innerHTML = '<li class="pn-empty">Noch keine Partie-Nummern</li>';
         return;
     }
-    const reversed = [...editingParties].reverse();
+    const reversed = [...state.editingParties].reverse();
     list.innerHTML = reversed.map(p =>
         `<li class="pn-item">${escHtml(p.value)}<span class="pn-item-date">${escHtml(p.addedAt)}</span></li>`
     ).join('');
@@ -232,11 +236,11 @@ function confirmNewPartie() {
     const val = document.getElementById('pn-new-input').value.trim();
     if (!val) { showToast('Bitte Partie-Nummer eingeben.'); return; }
     const now = new Date();
-    editingParties.push({
-        value: val,
-        addedAt: now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-            + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-        addedAtMs: now.getTime(),
+    state.editingParties.push({
+        value:      val,
+        addedAt:    now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                  + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        addedAtMs:  now.getTime(),
     });
     document.getElementById('pn-new-row').style.display = 'none';
     document.getElementById('pn-new-input').value = '';
@@ -248,24 +252,71 @@ function confirmNewPartie() {
    EVENT HANDLER & INIT
 ═══════════════════════════════════════════════ */
 
-document.addEventListener('keydown', (e) => {
-    if (!document.getElementById('overlay').classList.contains('open')) return;
-    if (e.key === 'Escape') closeModal();
-    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA'
-        && e.target.id !== 'pn-new-input' && e.target.id !== 'f-num') {
-        e.preventDefault();
-        saveSlot();
-    }
-});
-
-document.addEventListener('click', () => {
-    document.getElementById('status-dropdown')?.classList.remove('open');
-    document.getElementById('partie-dropdown')?.classList.remove('open');
-});
-
-(function init() {
+function init() {
     loadFromStorage();
     render();
     document.getElementById('sub').textContent =
-        `${slots.length} Fächer geladen · Klicke auf ein Fach zum Bearbeiten`;
-})();
+        `${state.slots.length} Fächer geladen · Klicke auf ein Fach zum Bearbeiten`;
+
+    // Topbar
+    document.getElementById('logout-btn').addEventListener('click', logout);
+    document.getElementById('layout-btn').addEventListener('click', cycleLayout);
+    document.getElementById('add-btn').addEventListener('click', openAdd);
+
+    // Haupt-Overlay
+    document.getElementById('overlay').addEventListener('click', (e) => {
+        if (e.target.id === 'overlay') closeModal();
+    });
+    document.getElementById('del-btn').addEventListener('click', deleteSlot);
+    document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+    document.getElementById('modal-save-btn').addEventListener('click', saveSlot);
+
+    // Status-Dropdown
+    document.getElementById('status-trigger').addEventListener('click', toggleDropdown);
+    document.querySelectorAll('.cs-item').forEach(li => {
+        li.addEventListener('click', () => selectStatus(li));
+    });
+
+    // Partie-Dropdown
+    document.getElementById('partie-trigger').addEventListener('click', togglePartieDropdown);
+    document.getElementById('partie-add-btn').addEventListener('click', openNewPartieInput);
+    document.getElementById('pn-ok-btn').addEventListener('click', confirmNewPartie);
+    document.getElementById('pn-new-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); confirmNewPartie(); }
+    });
+
+    // Temperatur-Overlay
+    document.getElementById('temp-overlay').addEventListener('click', (e) => {
+        if (e.target.id === 'temp-overlay') closeTempForm();
+    });
+    document.getElementById('temp-add-btn').addEventListener('click', openTempForm);
+    document.getElementById('temp-cancel-btn').addEventListener('click', closeTempForm);
+    document.getElementById('temp-save-btn').addEventListener('click', saveTempEntry);
+
+    // Temperaturliste – Event-Delegation für dynamische Einträge
+    document.getElementById('temp-list').addEventListener('click', (e) => {
+        const entry = e.target.closest('.temp-entry');
+        if (entry) toggleTempEntry(entry);
+    });
+
+    // Tastatur
+    document.addEventListener('keydown', (e) => {
+        if (!document.getElementById('overlay').classList.contains('open')) return;
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Enter'
+            && e.target.tagName !== 'TEXTAREA'
+            && e.target.id !== 'pn-new-input'
+            && e.target.id !== 'f-num') {
+            e.preventDefault();
+            saveSlot();
+        }
+    });
+
+    // Dropdowns bei Klick außerhalb schließen
+    document.addEventListener('click', () => {
+        document.getElementById('status-dropdown')?.classList.remove('open');
+        document.getElementById('partie-dropdown')?.classList.remove('open');
+    });
+}
+
+init();
