@@ -1,5 +1,6 @@
-import { escHtml, showToast } from './utils.js';
+import { showToast } from './utils.js';
 import { state } from './state.js';
+import { returnTempEntryTemplate } from './template.js';
 
 /* ═══════════════════════════════════════════════
    TEMPERATUR-EINTRÄGE
@@ -24,21 +25,7 @@ export function renderTempList() {
         const locked = isTempLocked(e);
         let entryClass = 'temp-entry';
         if (locked) entryClass += ' temp-locked';
-        return `
-          <div class="${entryClass}">
-            <div class="temp-entry-preview">
-              <span class="temp-preview-range">${e.von}°C – ${e.bis}°C</span>
-              <span class="temp-preview-date">${escHtml(e.savedAtDisplay)}</span>
-            </div>
-            <div class="temp-entry-details">
-              <div class="temp-detail-row"><span class="temp-detail-lbl">Sichtkontrolle</span><span>${escHtml(e.sicht)}</span></div>
-              <div class="temp-detail-row"><span class="temp-detail-lbl">Maßnahmen</span><span>${escHtml(e.massnahmen)}</span></div>
-              <div class="temp-entry-meta">
-                <span>${escHtml(e.savedAtDisplay)}</span>
-                <span>${escHtml(e.savedBy)}</span>
-              </div>
-            </div>
-          </div>`;
+        return returnTempEntryTemplate(e, entryClass);
     }).join('');
 }
 

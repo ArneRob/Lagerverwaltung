@@ -1,6 +1,7 @@
-import { escHtml, showToast, nowTimestamp, logout } from './utils.js';
+import { showToast, nowTimestamp, logout } from './utils.js';
 import { state, COL_OPTIONS, STATUS_LABELS, loadFromStorage, saveToStorage } from './state.js';
 import { renderTempList, openTempForm, closeTempForm, saveTempEntry, toggleTempEntry } from './temperature.js';
+import { returnStatsTemplate, returnSlotCardTemplate, returnPartieItemTemplate } from './template.js';
 
 /* ═══════════════════════════════════════════════
    RENDERING
@@ -10,32 +11,7 @@ function renderStats() {
     const counts = { leer: 0, voll: 0, gereinigt: 0, reserviert: 0 };
     state.slots.forEach(s => counts[s.status]++);
 
-    document.getElementById('stats').innerHTML = `
-      <div class="stat">
-        <div class="stat-val">${state.slots.length}</div>
-        <div class="stat-lbl">Gesamt</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--c-voll-txt)">${counts.voll}</div>
-        <div class="stat-lbl">Voll</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--c-reserviert-txt)">${counts.reserviert}</div>
-        <div class="stat-lbl">Reserviert</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--c-leer-txt)">${counts.leer + counts.gereinigt}</div>
-        <div class="stat-lbl">Leer</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--c-gereinigt-txt)">${counts.gereinigt}</div>
-        <div class="stat-lbl">Gereinigt</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--c-leer-txt)">${counts.leer}</div>
-        <div class="stat-lbl">Ungereinigt</div>
-      </div>
-    `;
+    document.getElementById('stats').innerHTML = returnStatsTemplate(state.slots.length, counts);
 }
 
 function renderGrid() {
@@ -51,12 +27,7 @@ function renderGrid() {
         if (sl.parties && sl.parties.length > 0) {
             lastPartie = sl.parties[sl.parties.length - 1].value;
         }
-        card.innerHTML = `
-          <div class="slot-num">Fach ${sl.slotNumber}</div>
-          <div class="slot-name">${escHtml(lastPartie)}</div>
-          <div class="badge ${sl.status}">${STATUS_LABELS[sl.status]}</div>
-          <div class="slot-info">${escHtml(sl.updated)}</div>
-        `;
+        card.innerHTML = returnSlotCardTemplate(sl, lastPartie, STATUS_LABELS[sl.status]);
         card.addEventListener('click', () => openEdit(sl.id));
         grid.appendChild(card);
     });
@@ -231,9 +202,7 @@ function populatePartieList() {
         return;
     }
     const reversed = [...state.editingParties].reverse();
-    list.innerHTML = reversed.map(p =>
-        `<li class="pn-item">${escHtml(p.value)}<span class="pn-item-date">${escHtml(p.addedAt)}</span></li>`
-    ).join('');
+    list.innerHTML = reversed.map(p => returnPartieItemTemplate(p)).join('');
 }
 
 function openNewPartieInput() {
