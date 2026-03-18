@@ -93,14 +93,23 @@ function resolveSlotNumber() {
 }
 
 /**
- * Prüft ob alle Partitionen mindestens eine Partie-Nummer haben.
+ * Prüft ob alle Partitionen konsistent befüllt sind.
+ * Erlaubt: komplett leer (kein Fruchtart, keine Partienummern).
+ * Nicht erlaubt: nur Fruchtart ohne Partienummer oder umgekehrt.
  * @returns {boolean} true wenn valide, false wenn nicht.
  */
 function validatePartitions() {
     for (let i = 0; i < state.editingPartitions.length; i++) {
-        if (state.editingPartitions[i].parties.length === 0) {
-            const label = state.editingPartitions[i].label;
-            showToast(`Partition ${label}: Bitte mindestens eine Partie-Nummer hinzufügen.`);
+        const partition   = state.editingPartitions[i];
+        const hasFrucht   = partition.fruchtart.trim().length > 0;
+        const hasParties  = partition.parties.length > 0;
+
+        if (hasFrucht && !hasParties) {
+            showToast(`Partition ${partition.label}: Fruchtart angegeben – bitte auch eine Partie-Nummer hinzufügen.`);
+            return false;
+        }
+        if (hasParties && !hasFrucht) {
+            showToast(`Partition ${partition.label}: Partie-Nummer angegeben – bitte auch eine Fruchtart eingeben.`);
             return false;
         }
     }
