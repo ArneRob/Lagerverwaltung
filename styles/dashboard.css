@@ -219,8 +219,9 @@ body {
 .slot-num {
     display: flex;
     align-items: baseline;
-    gap: 6px;
+    gap: 3px;
     margin-bottom: 3px;
+    flex-direction: column;
 }
 
 .slot-fach {

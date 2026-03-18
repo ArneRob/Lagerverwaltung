@@ -8,10 +8,12 @@ import { render } from './render.js';
    MODAL
 ═══════════════════════════════════════════════ */
 
+/** Schließt das Haupt-Overlay. */
 export function closeModal() {
     document.getElementById('overlay').classList.remove('open');
 }
 
+/** Öffnet das Modal zum Anlegen eines neuen Lagers. */
 export function openAdd() {
     state.editingId          = null;
     state.editingPartitions  = [{ label: 'A', fruchtart: '', parties: [], temperatures: [] }];
@@ -21,35 +23,41 @@ export function openAdd() {
     loadPartitionContent(0);
     renderPartitionTabs();
     setDropdownValue('leer');
-    document.getElementById('f-date').value       = nowTimestamp();
-    document.getElementById('del-btn').style.display   = 'none';
-    document.getElementById('clear-btn').style.display = 'none';
+    document.getElementById('f-date').value                   = nowTimestamp();
+    document.getElementById('del-btn').style.display          = 'none';
+    document.getElementById('clear-btn').style.display        = 'none';
     document.getElementById('partition-picker').style.display = 'none';
     document.getElementById('modal-content').style.display    = 'block';
     document.getElementById('overlay').classList.add('open');
     document.getElementById('f-num').focus();
 }
 
-export function openEdit(id) {
-    const slot = state.slots.find(s => s.id === id);
-    if (!slot) return;
-    state.editingId = id;
-    state.editingPartitions = slot.partitions.map(partition => ({
+/**
+ * Erstellt eine tiefe Kopie aller Partitionen eines Slots für den Bearbeitungszustand.
+ * @param {object} slot - Der Slot aus state.slots.
+ * @returns {Array} Kopierte Partitionen.
+ */
+function buildEditingPartitions(slot) {
+    return slot.partitions.map(partition => ({
         label:        partition.label,
         fruchtart:    partition.fruchtart || '',
         parties:      partition.parties ? partition.parties.map(x => ({ ...x })) : [],
         temperatures: partition.temperatures ? [...partition.temperatures] : [],
     }));
-    state.activePartitionIdx = 0;
+}
+
+/**
+ * Setzt alle DOM-Elemente des Modals für einen bestehenden Slot und öffnet das Overlay.
+ * @param {object} slot - Der Slot aus state.slots.
+ */
+function showModalForSlot(slot) {
     document.getElementById('modal-title').textContent     = `Lager ${slot.slotNumber}`;
-    loadPartitionContent(0);
-    renderPartitionTabs();
-    setDropdownValue(slot.status);
-    document.getElementById('f-date').value            = slot.updated;
-    document.getElementById('del-btn').style.display   = 'inline-block';
-    document.getElementById('clear-btn').style.display = 'inline-block';
-    document.getElementById('pn-new-row').style.display = 'none';
+    document.getElementById('f-date').value                = slot.updated;
+    document.getElementById('del-btn').style.display       = 'inline-block';
+    document.getElementById('clear-btn').style.display     = 'inline-block';
+    document.getElementById('pn-new-row').style.display    = 'none';
     document.getElementById('overlay').classList.add('open');
+    setDropdownValue(slot.status);
     if (state.editingPartitions.length > 1) {
         showPartitionPicker();
     } else {
@@ -58,28 +66,54 @@ export function openEdit(id) {
     }
 }
 
-export function saveSlot() {
-    saveCurrentPartitionState();
+/**
+ * Öffnet das Modal zum Bearbeiten eines bestehenden Slots.
+ * @param {number} id - Die ID des zu bearbeitenden Slots.
+ */
+export function openEdit(id) {
+    const slot = state.slots.find(s => s.id === id);
+    if (!slot) return;
+    state.editingId          = id;
+    state.editingPartitions  = buildEditingPartitions(slot);
+    state.activePartitionIdx = 0;
+    loadPartitionContent(0);
+    renderPartitionTabs();
+    showModalForSlot(slot);
+}
 
-    const numInput = document.getElementById('f-num');
-    let slotNumber;
+/**
+ * Ermittelt die Lagernummer – beim Bearbeiten aus dem Slot, beim Anlegen aus dem Input.
+ * @returns {number} Die Lagernummer.
+ */
+function resolveSlotNumber() {
     if (state.editingId !== null) {
-        slotNumber = state.slots.find(s => s.id === state.editingId)?.slotNumber;
-    } else {
-        slotNumber = parseInt(numInput?.value, 10) || state.nextId + 4;
+        return state.slots.find(s => s.id === state.editingId)?.slotNumber;
     }
+    return parseInt(document.getElementById('f-num')?.value, 10) || state.nextId + 4;
+}
 
-    const status  = document.getElementById('f-status').value;
-    const updated = nowTimestamp();
-
+/**
+ * Prüft ob alle Partitionen mindestens eine Partie-Nummer haben.
+ * @returns {boolean} true wenn valide, false wenn nicht.
+ */
+function validatePartitions() {
     for (let i = 0; i < state.editingPartitions.length; i++) {
         if (state.editingPartitions[i].parties.length === 0) {
             const label = state.editingPartitions[i].label;
             showToast(`Partition ${label}: Bitte mindestens eine Partie-Nummer hinzufügen.`);
-            return;
+            return false;
         }
     }
+    return true;
+}
 
+/**
+ * Schreibt die Änderungen in den bestehenden Slot oder legt einen neuen an.
+ * @param {number} slotNumber - Die Lagernummer.
+ * @param {string} status     - Der neue Status.
+ * @param {string} updated    - Zeitstempel der Änderung.
+ */
+function applySlotChanges(slotNumber, status, updated) {
     if (state.editingId !== null) {
         const slot = state.slots.find(s => s.id === state.editingId);
         if (slot) {
@@ -88,13 +122,20 @@ export function saveSlot() {
             slot.updated    = updated;
         }
     } else {
-        state.slots.push({
-            id: state.nextId++, slotNumber,
-            partitions: state.editingPartitions,
-            status, updated,
-        });
+        state.slots.push({ id: state.nextId++, slotNumber, partitions: state.editingPartitions, status, updated });
     }
+}
 
+/** Speichert den aktuellen Bearbeitungszustand des Slots. */
+export function saveSlot() {
+    saveCurrentPartitionState();
+    if (!validatePartitions()) return;
+
+    const slotNumber = resolveSlotNumber();
+    const status     = document.getElementById('f-status').value;
+    const updated    = nowTimestamp();
+
+    applySlotChanges(slotNumber, status, updated);
     saveToStorage();
     closeModal();
     render();
@@ -105,23 +146,46 @@ export function saveSlot() {
     }
 }
 
+/**
+ * Archiviert die aktive Partition und hebt die Teilung auf.
+ * @param {object} slot - Der Slot aus state.slots.
+ * @returns {boolean} true wenn bestätigt und durchgeführt, false bei Abbruch.
+ */
+function clearActivePartition(slot) {
+    const partition = slot.partitions[state.activePartitionIdx];
+    if (!confirm(`Partition ${partition.label} in Lager ${slot.slotNumber} wirklich leeren? Die Daten werden archiviert und die Teilung aufgehoben.`)) return false;
+    archivePartitionData(slot, partition);
+    deletePartition(state.activePartitionIdx);
+    slot.partitions = state.editingPartitions;
+    return true;
+}
+
+/**
+ * Archiviert das gesamte Lager und setzt es auf leer zurück.
+ * @param {object} slot - Der Slot aus state.slots.
+ * @returns {boolean} true wenn bestätigt und durchgeführt, false bei Abbruch.
+ */
+function clearSinglePartition(slot) {
+    if (!confirm(`Lager ${slot.slotNumber} wirklich leeren? Die Daten werden archiviert.`)) return false;
+    archiveSlotData(slot);
+    slot.partitions = [{ label: 'A', fruchtart: '', parties: [], temperatures: [] }];
+    slot.status     = 'leer';
+    return true;
+}
+
+/** Leert das aktive Lager oder die aktive Partition und archiviert die Daten. */
 export function clearSlot() {
     if (state.editingId === null) return;
     const slot = state.slots.find(s => s.id === state.editingId);
     if (!slot) return;
 
+    let cleared;
     if (slot.partitions.length > 1) {
-        const partition = slot.partitions[state.activePartitionIdx];
-        if (!confirm(`Partition ${partition.label} in Lager ${slot.slotNumber} wirklich leeren? Die Daten werden archiviert und die Teilung aufgehoben.`)) return;
-        archivePartitionData(slot, partition);
-        deletePartition(state.activePartitionIdx);
-        slot.partitions = state.editingPartitions;
+        cleared = clearActivePartition(slot);
     } else {
-        if (!confirm(`Lager ${slot.slotNumber} wirklich leeren? Die Daten werden archiviert.`)) return;
-        archiveSlotData(slot);
-        slot.partitions = [{ label: 'A', fruchtart: '', parties: [], temperatures: [] }];
-        slot.status     = 'leer';
+        cleared = clearSinglePartition(slot);
     }
+    if (!cleared) return;
 
     slot.updated = nowTimestamp();
     saveToStorage();
@@ -130,6 +194,7 @@ export function clearSlot() {
     showToast(`✓ Lager ${slot.slotNumber} geleert und archiviert`);
 }
 
+/** Löscht das aktive Lager vollständig nach Bestätigung. */
 export function deleteSlot() {
     if (state.editingId === null) return;
     const slot = state.slots.find(s => s.id === state.editingId);
