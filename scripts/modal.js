@@ -1,6 +1,6 @@
 import { showToast, nowTimestamp } from './utils.js';
 import { state, saveToStorage, archiveSlotData, archivePartitionData } from './state.js';
-import { saveCurrentPartitionState, loadPartitionContent, renderPartitionTabs, showPartitionPicker } from './partition.js';
+import { saveCurrentPartitionState, loadPartitionContent, renderPartitionTabs, showPartitionPicker, deletePartition } from './partition.js';
 import { setDropdownValue } from './dropdown.js';
 import { render } from './render.js';
 
