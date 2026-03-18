@@ -1,7 +1,7 @@
 import { showToast, nowTimestamp, logout } from './utils.js';
 import { state, COL_OPTIONS, STATUS_LABELS, loadFromStorage, saveToStorage } from './state.js';
 import { renderTempList, openTempForm, closeTempForm, saveTempEntry, toggleTempEntry } from './temperature.js';
-import { returnStatsTemplate, returnSlotCardTemplate, returnPartieItemTemplate, returnPartitionTabsTemplate } from './template.js';
+import { returnStatsTemplate, returnSlotCardTemplate, returnPartieItemTemplate, returnPartitionTabsTemplate, returnPartitionPickerTemplate } from './template.js';
 
 /* ═══════════════════════════════════════════════
    RENDERING
@@ -125,6 +125,25 @@ function renderPartitionTabs() {
    MODAL
 ═══════════════════════════════════════════════ */
 
+function showPartitionPicker() {
+    const picker = document.getElementById('partition-picker');
+    picker.innerHTML = returnPartitionPickerTemplate(state.editingPartitions);
+    picker.style.display = 'flex';
+    document.getElementById('modal-content').style.display = 'none';
+    picker.querySelectorAll('.picker-card').forEach((btn) => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        btn.addEventListener('click', () => selectPartitionFromPicker(idx));
+    });
+}
+
+function selectPartitionFromPicker(idx) {
+    state.activePartitionIdx = idx;
+    loadPartitionContent(idx);
+    renderPartitionTabs();
+    document.getElementById('partition-picker').style.display = 'none';
+    document.getElementById('modal-content').style.display = 'block';
+}
+
 function openAdd() {
     state.editingId = null;
     state.editingPartitions  = [{ label: 'A', fruchtart: '', parties: [], temperatures: [] }];
@@ -136,6 +155,8 @@ function openAdd() {
     setDropdownValue('leer');
     document.getElementById('f-date').value = nowTimestamp();
     document.getElementById('del-btn').style.display = 'none';
+    document.getElementById('partition-picker').style.display = 'none';
+    document.getElementById('modal-content').style.display = 'block';
     document.getElementById('overlay').classList.add('open');
     document.getElementById('f-num').focus();
 }
@@ -159,6 +180,12 @@ function openEdit(id) {
     document.getElementById('del-btn').style.display = 'inline-block';
     document.getElementById('pn-new-row').style.display = 'none';
     document.getElementById('overlay').classList.add('open');
+    if (state.editingPartitions.length > 1) {
+        showPartitionPicker();
+    } else {
+        document.getElementById('partition-picker').style.display = 'none';
+        document.getElementById('modal-content').style.display = 'block';
+    }
 }
 
 function closeModal() {

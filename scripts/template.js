@@ -64,6 +64,24 @@ export function returnPartieItemTemplate(p) {
     return `<li class="pn-item">${escHtml(p.value)}<span class="pn-item-date">${escHtml(p.addedAt)}</span></li>`;
 }
 
+export function returnPartitionPickerTemplate(partitions) {
+    const items = partitions.map((p, i) => {
+        let fruchtDisplay = 'Keine Fruchtart';
+        if (p.fruchtart) fruchtDisplay = escHtml(p.fruchtart);
+        let lastPartie = '—';
+        if (p.parties && p.parties.length > 0) {
+            lastPartie = escHtml(p.parties[p.parties.length - 1].value);
+        }
+        return `
+          <button class="picker-card" data-idx="${i}">
+            <div class="picker-label">${escHtml(p.label)}</div>
+            <div class="picker-frucht">${fruchtDisplay}</div>
+            <div class="picker-partie">${lastPartie}</div>
+          </button>`;
+    }).join('');
+    return `<div class="picker-title">Welche Teilung möchtest du bearbeiten?</div><div class="picker-cards">${items}</div>`;
+}
+
 export function returnPartitionTabsTemplate(partitions, activeIdx) {
     return partitions.map((p, i) => {
         let cls = 'partition-tab';

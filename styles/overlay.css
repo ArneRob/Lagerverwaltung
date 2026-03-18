@@ -37,6 +37,59 @@
     gap: 6px;
 }
 
+/* ── Partition-Picker ── */
+.partition-picker {
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.picker-title {
+    font-size: 17px;
+    color: var(--text2);
+    text-align: center;
+}
+
+.picker-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.picker-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--surface2);
+    border: 0.5px solid var(--border-md);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-family: var(--font);
+    text-align: left;
+    width: 100%;
+}
+
+.picker-card:hover { border-color: var(--c-voll); }
+
+.picker-label {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 32px;
+}
+
+.picker-frucht {
+    font-size: 17px;
+    color: var(--text);
+    flex: 1;
+}
+
+.picker-partie {
+    font-size: 15px;
+    color: var(--text3);
+}
+
 /* ── Partition-Tabs ── */
 .partition-tabs {
     flex-wrap: wrap;
