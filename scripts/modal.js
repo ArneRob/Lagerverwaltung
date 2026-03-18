@@ -1,6 +1,6 @@
 import { showToast, nowTimestamp } from './utils.js';
-import { state, saveToStorage, archiveSlotData } from './state.js';
-import { saveCurrentPartitionState, loadPartitionContent, renderPartitionTabs, showPartitionPicker, deletePartition } from './partition.js';
+import { state, saveToStorage, archiveSlotData, archivePartitionData } from './state.js';
+import { saveCurrentPartitionState, loadPartitionContent, renderPartitionTabs, showPartitionPicker } from './partition.js';
 import { setDropdownValue } from './dropdown.js';
 import { render } from './render.js';
 
@@ -109,11 +109,21 @@ export function clearSlot() {
     if (state.editingId === null) return;
     const slot = state.slots.find(s => s.id === state.editingId);
     if (!slot) return;
-    if (!confirm(`Fach ${slot.slotNumber} wirklich leeren? Die Daten werden archiviert.`)) return;
-    archiveSlotData(slot);
-    slot.partitions = [{ label: 'A', fruchtart: '', parties: [], temperatures: [] }];
-    slot.status     = 'leer';
-    slot.updated    = nowTimestamp();
+
+    if (slot.partitions.length > 1) {
+        const partition = slot.partitions[state.activePartitionIdx];
+        if (!confirm(`Partition ${partition.label} in Fach ${slot.slotNumber} wirklich leeren? Die Daten werden archiviert und die Teilung aufgehoben.`)) return;
+        archivePartitionData(slot, partition);
+        deletePartition(state.activePartitionIdx);
+        slot.partitions = state.editingPartitions;
+    } else {
+        if (!confirm(`Fach ${slot.slotNumber} wirklich leeren? Die Daten werden archiviert.`)) return;
+        archiveSlotData(slot);
+        slot.partitions = [{ label: 'A', fruchtart: '', parties: [], temperatures: [] }];
+        slot.status     = 'leer';
+    }
+
+    slot.updated = nowTimestamp();
     saveToStorage();
     closeModal();
     render();
@@ -122,20 +132,8 @@ export function clearSlot() {
 
 export function deleteSlot() {
     if (state.editingId === null) return;
-
-    if (state.editingPartitions.length > 1) {
-        const partition = state.editingPartitions[state.activePartitionIdx];
-        if (!confirm(`Partition ${partition.label} wirklich löschen?`)) return;
-        deletePartition(state.activePartitionIdx);
-        return;
-    }
-
     const slot = state.slots.find(s => s.id === state.editingId);
-    let lastName = 'dieses Fach';
-    if (slot && slot.partitions && slot.partitions[0] && slot.partitions[0].parties && slot.partitions[0].parties.length > 0) {
-        lastName = slot.partitions[0].parties[slot.partitions[0].parties.length - 1].value;
-    }
-    if (!confirm(`"${lastName}" wirklich löschen?`)) return;
+    if (!confirm(`Fach ${slot.slotNumber} wirklich löschen?`)) return;
     state.slots = state.slots.filter(s => s.id !== state.editingId);
     saveToStorage();
     closeModal();

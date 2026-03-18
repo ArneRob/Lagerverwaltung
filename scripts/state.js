@@ -68,31 +68,47 @@ export function loadFromStorage() {
     } catch (_) { }
 }
 
+function writeToArchive(fachKey, fruchtKey, partienValues, temperaturen) {
+    const raw    = localStorage.getItem(ARCHIVE_KEY);
+    const archiv = raw ? JSON.parse(raw) : {};
+
+    if (!archiv[fachKey]) {
+        archiv[fachKey] = {};
+    }
+
+    const now      = new Date();
+    const datumKey = now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                   + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+    if (!archiv[fachKey][datumKey]) {
+        archiv[fachKey][datumKey] = {};
+    }
+
+    archiv[fachKey][datumKey][fruchtKey] = {
+        partien:      partienValues,
+        temperaturen: temperaturen,
+    };
+
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiv));
+}
+
 export function archiveSlotData(slot) {
     try {
-        const raw     = localStorage.getItem(ARCHIVE_KEY);
-        const archiv  = raw ? JSON.parse(raw) : {};
         const fachKey = `Fach ${slot.slotNumber}`;
-
-        if (!archiv[fachKey]) {
-            archiv[fachKey] = {};
-        }
-
-        const now         = new Date();
-        const datumKey    = now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                          + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-        const eintrag     = {};
-
-        slot.partitions.forEach(p => {
-            const fruchtKey      = p.fruchtart || 'Unbekannt';
-            eintrag[fruchtKey]   = {
-                partien:      p.parties.map(x => x.value),
-                temperaturen: p.temperatures,
-            };
+        slot.partitions.forEach(partition => {
+            const fruchtKey = partition.fruchtart || 'Unbekannt';
+            writeToArchive(fachKey, fruchtKey, partition.parties.map(x => x.value), partition.temperatures);
         });
+    } catch (e) {
+        console.warn('Archivierung fehlgeschlagen:', e);
+    }
+}
 
-        archiv[fachKey][datumKey] = eintrag;
-        localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiv));
+export function archivePartitionData(slot, partition) {
+    try {
+        const fachKey   = `Fach ${slot.slotNumber}`;
+        const fruchtKey = partition.fruchtart || 'Unbekannt';
+        writeToArchive(fachKey, fruchtKey, partition.parties.map(x => x.value), partition.temperatures);
     } catch (e) {
         console.warn('Archivierung fehlgeschlagen:', e);
     }
