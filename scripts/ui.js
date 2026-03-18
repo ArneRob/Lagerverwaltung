@@ -1,5 +1,5 @@
 import { showToast, nowTimestamp, logout } from './utils.js';
-import { state, COL_OPTIONS, STATUS_LABELS, loadFromStorage, saveToStorage } from './state.js';
+import { state, COL_OPTIONS, STATUS_LABELS, loadFromStorage, saveToStorage, archiveSlotData } from './state.js';
 import { renderTempList, openTempForm, closeTempForm, saveTempEntry, toggleTempEntry } from './temperature.js';
 import { returnStatsTemplate, returnSlotCardTemplate, returnPartieItemTemplate, returnPartitionTabsTemplate, returnPartitionPickerTemplate } from './template.js';
 
@@ -155,6 +155,7 @@ function openAdd() {
     setDropdownValue('leer');
     document.getElementById('f-date').value = nowTimestamp();
     document.getElementById('del-btn').style.display = 'none';
+    document.getElementById('clear-btn').style.display = 'none';
     document.getElementById('partition-picker').style.display = 'none';
     document.getElementById('modal-content').style.display = 'block';
     document.getElementById('overlay').classList.add('open');
@@ -178,6 +179,7 @@ function openEdit(id) {
     setDropdownValue(sl.status);
     document.getElementById('f-date').value = sl.updated;
     document.getElementById('del-btn').style.display = 'inline-block';
+    document.getElementById('clear-btn').style.display = 'inline-block';
     document.getElementById('pn-new-row').style.display = 'none';
     document.getElementById('overlay').classList.add('open');
     if (state.editingPartitions.length > 1) {
@@ -237,6 +239,21 @@ function saveSlot() {
     } else {
         showToast('✓ Fach hinzugefügt');
     }
+}
+
+function clearSlot() {
+    if (state.editingId === null) return;
+    const slot = state.slots.find(s => s.id === state.editingId);
+    if (!slot) return;
+    if (!confirm(`Fach ${slot.slotNumber} wirklich leeren? Die Daten werden archiviert.`)) return;
+    archiveSlotData(slot);
+    slot.partitions = [{ label: 'A', fruchtart: '', parties: [], temperatures: [] }];
+    slot.status     = 'leer';
+    slot.updated    = nowTimestamp();
+    saveToStorage();
+    closeModal();
+    render();
+    showToast(`✓ Fach ${slot.slotNumber} geleert und archiviert`);
 }
 
 function deleteSlot() {
@@ -360,6 +377,7 @@ function init() {
         if (e.target.id === 'overlay') closeModal();
     });
     document.getElementById('del-btn').addEventListener('click', deleteSlot);
+    document.getElementById('clear-btn').addEventListener('click', clearSlot);
     document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
     document.getElementById('modal-save-btn').addEventListener('click', saveSlot);
 

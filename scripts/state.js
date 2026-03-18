@@ -4,9 +4,10 @@ import { showToast, nowTimestamp } from './utils.js';
    KONSTANTEN
 ═══════════════════════════════════════════════ */
 
-export const STORAGE_KEY = 'lager_slots';
-export const COL_KEY     = 'lager_col_idx';
-export const COL_OPTIONS = [2, 3];
+export const STORAGE_KEY  = 'lager_slots';
+export const COL_KEY      = 'lager_col_idx';
+export const ARCHIVE_KEY  = 'lager_archiv';
+export const COL_OPTIONS  = [2, 3];
 
 export const STATUS_LABELS = {
     leer:       'Ungereinigt',
@@ -65,6 +66,36 @@ export function loadFromStorage() {
         const ci = localStorage.getItem(COL_KEY);
         if (ci !== null) state.colIdx = parseInt(ci, 10);
     } catch (_) { }
+}
+
+export function archiveSlotData(slot) {
+    try {
+        const raw     = localStorage.getItem(ARCHIVE_KEY);
+        const archiv  = raw ? JSON.parse(raw) : {};
+        const fachKey = `Fach ${slot.slotNumber}`;
+
+        if (!archiv[fachKey]) {
+            archiv[fachKey] = {};
+        }
+
+        const now         = new Date();
+        const datumKey    = now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                          + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+        const eintrag     = {};
+
+        slot.partitions.forEach(p => {
+            const fruchtKey      = p.fruchtart || 'Unbekannt';
+            eintrag[fruchtKey]   = {
+                partien:      p.parties.map(x => x.value),
+                temperaturen: p.temperatures,
+            };
+        });
+
+        archiv[fachKey][datumKey] = eintrag;
+        localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiv));
+    } catch (e) {
+        console.warn('Archivierung fehlgeschlagen:', e);
+    }
 }
 
 export function saveToStorage() {

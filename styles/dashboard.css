@@ -107,6 +107,24 @@ body {
     background-color: var(--c-leer);
 }
 
+.btn.warning {
+    background-color: var(--c-reserviert-bg);
+    color: var(--c-reserviert-txt);
+    border-color: var(--c-reserviert);
+}
+
+.modal-actions-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#del-btn {
+    font-size: 14px;
+    padding: 5px 11px;
+    margin-top: 4px;
+}
+
 /* ── Stats ── */
 .stats {
     display: grid;
