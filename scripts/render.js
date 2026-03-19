@@ -104,6 +104,52 @@ function renderWarehouseGrid() {
 ═══════════════════════════════════════════════ */
 
 /**
+ * Sorts hose slots: wiese first, then acker, each group ascending by slotNumber.
+ * @returns {Array} Sorted copy of state.hoseSlots.
+ */
+function sortHoseSlots() {
+    const locationOrder = { wiese: 0, acker: 1 };
+    return [...state.hoseSlots].sort((a, b) => {
+        const locationDiff = (locationOrder[a.standort] ?? 0) - (locationOrder[b.standort] ?? 0);
+        if (locationDiff !== 0) {
+            return locationDiff;
+        }
+        return a.slotNumber - b.slotNumber;
+    });
+}
+
+/**
+ * Creates and returns a hose card DOM element.
+ * @param {Object} hose - The hose slot data object.
+ * @returns {HTMLDivElement}
+ */
+function createHoseCardElement(hose) {
+    const card = document.createElement('div');
+    card.className          = `schlauch-card ${hose.standort || 'wiese'}`;
+    card.dataset.schlauchId = String(hose.id);
+
+    let lastParty = '—';
+    if (hose.parties && hose.parties.length > 0) {
+        lastParty = hose.parties[hose.parties.length - 1].value;
+    }
+
+    card.innerHTML = returnHoseCardTemplate(hose, lastParty);
+    return card;
+}
+
+/**
+ * Creates and returns the "Schlauch hinzufügen" button element.
+ * @returns {HTMLButtonElement}
+ */
+function createAddHoseButton() {
+    const addBtn = document.createElement('button');
+    addBtn.className      = 'add-slot';
+    addBtn.dataset.action = 'add-schlauch';
+    addBtn.innerHTML      = '<div class="plus">+</div><div>Schlauch hinzufügen</div>';
+    return addBtn;
+}
+
+/**
  * Renders the hose grid with all hose cards.
  */
 function renderHoseGrid() {
@@ -112,34 +158,8 @@ function renderHoseGrid() {
     grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
     grid.innerHTML = '';
 
-    const sortedHoseSlots = [...state.hoseSlots].sort((a, b) => {
-        const locationOrder = { wiese: 0, acker: 1 };
-        const locationDiff  = (locationOrder[a.standort] ?? 0) - (locationOrder[b.standort] ?? 0);
-        if (locationDiff !== 0) {
-            return locationDiff;
-        }
-        return a.slotNumber - b.slotNumber;
-    });
-
-    sortedHoseSlots.forEach((hose) => {
-        const card = document.createElement('div');
-        card.className          = `schlauch-card ${hose.standort || 'wiese'}`;
-        card.dataset.schlauchId = String(hose.id);
-
-        let lastParty = '—';
-        if (hose.parties && hose.parties.length > 0) {
-            lastParty = hose.parties[hose.parties.length - 1].value;
-        }
-
-        card.innerHTML = returnHoseCardTemplate(hose, lastParty);
-        grid.appendChild(card);
-    });
-
-    const addBtn = document.createElement('button');
-    addBtn.className      = 'add-slot';
-    addBtn.dataset.action = 'add-schlauch';
-    addBtn.innerHTML      = '<div class="plus">+</div><div>Schlauch hinzufügen</div>';
-    grid.appendChild(addBtn);
+    sortHoseSlots().forEach(hose => grid.appendChild(createHoseCardElement(hose)));
+    grid.appendChild(createAddHoseButton());
 }
 
 /**

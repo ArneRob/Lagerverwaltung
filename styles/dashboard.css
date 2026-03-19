@@ -394,6 +394,16 @@ body {
     border: 0.5px solid var(--border-md);
 }
 
+.badge.schlauch-standort.wiese {
+    background: var(--c-gereinigt-bg);
+    color: var(--c-gereinigt-txt);
+}
+
+.badge.schlauch-standort.acker {
+    background: var(--c-voll-bg);
+    color: var(--c-voll-txt);
+}
+
 /* ── Notiz-Vorschautext ── */
 .notiz-preview-text {
     font-size: 15px;

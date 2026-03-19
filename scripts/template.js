@@ -62,7 +62,7 @@ export function returnHoseCardTemplate(hose, lastParty) {
         <div class="slot-fruchtart">${fruchtDisplay}</div>
       </div>
       <div class="slot-name">${escHtml(lastParty)}</div>
-      <div class="badge schlauch-standort">${locationLabel}</div>
+      <div class="badge schlauch-standort ${hose.standort || 'wiese'}">${locationLabel}</div>
       <div class="slot-info">${escHtml(hose.updated)}</div>`;
 }
 
