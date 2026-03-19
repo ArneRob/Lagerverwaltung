@@ -26,14 +26,16 @@ function updateViewUI() {
     const isHoseView = state.activeView === 'schlauch';
 
     if (isHoseView) {
-        document.querySelector('.legend').style.display = 'none';
-        document.getElementById('add-btn').textContent  = '+ Schlauch hinzufügen';
-        document.getElementById('sub').textContent      =
+        document.querySelector('.legend').style.display             = 'none';
+        document.querySelector('.legend-hose').style.display        = '';
+        document.getElementById('add-btn').textContent              = '+ Schlauch hinzufügen';
+        document.getElementById('sub').textContent                  =
             `${state.hoseSlots.length} Schläuche · Klicke auf einen Schlauch zum Bearbeiten`;
     } else {
-        document.querySelector('.legend').style.display = '';
-        document.getElementById('add-btn').textContent  = '+ Lager hinzufügen';
-        document.getElementById('sub').textContent      =
+        document.querySelector('.legend').style.display             = '';
+        document.querySelector('.legend-hose').style.display        = 'none';
+        document.getElementById('add-btn').textContent              = '+ Lager hinzufügen';
+        document.getElementById('sub').textContent                  =
             `${state.slots.length} Fächer geladen · Klicke auf ein Lager zum Bearbeiten`;
     }
 
@@ -110,9 +112,18 @@ function renderHoseGrid() {
     grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
     grid.innerHTML = '';
 
-    [...state.hoseSlots].sort((a, b) => a.slotNumber - b.slotNumber).forEach((hose) => {
+    const sortedHoseSlots = [...state.hoseSlots].sort((a, b) => {
+        const locationOrder = { wiese: 0, acker: 1 };
+        const locationDiff  = (locationOrder[a.standort] ?? 0) - (locationOrder[b.standort] ?? 0);
+        if (locationDiff !== 0) {
+            return locationDiff;
+        }
+        return a.slotNumber - b.slotNumber;
+    });
+
+    sortedHoseSlots.forEach((hose) => {
         const card = document.createElement('div');
-        card.className          = 'schlauch-card';
+        card.className          = `schlauch-card ${hose.standort || 'wiese'}`;
         card.dataset.schlauchId = String(hose.id);
 
         let lastParty = '—';

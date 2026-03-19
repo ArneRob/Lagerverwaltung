@@ -375,8 +375,16 @@ body {
     position: relative;
 }
 
+.schlauch-card.wiese {
+    border-color: var(--c-gereinigt);
+}
+
+.schlauch-card.acker {
+    border-color: var(--c-voll);
+}
+
 .schlauch-card:hover {
-    border-color: var(--c-voll-txt);
+    filter: brightness(1.15);
     transform: translateY(-1px);
 }
 
