@@ -1,7 +1,7 @@
 import { showToast, nowTimestamp } from './utils.js';
 import { state, saveHoseToStorage } from './state.js';
 import { render } from './render.js';
-import { renderHoseNoteList } from './schlauch-notiz.js';
+import { renderHoseNoteList } from './hose-note.js';
 import { returnPartieItemTemplate } from './template.js';
 
 /* ═══════════════════════════════════════════════

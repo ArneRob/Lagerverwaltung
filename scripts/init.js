@@ -16,8 +16,8 @@ import {
     confirmHoseNewParty,
     toggleHoseLocationDropdown,
     setHoseLocationValue,
-} from './schlauch-modal.js';
-import { openNoteForm, closeNoteForm, saveNoteEntry, toggleNoteEntry } from './schlauch-notiz.js';
+} from './hose-modal.js';
+import { openNoteForm, closeNoteForm, saveNoteEntry, toggleNoteEntry } from './hose-note.js';
 
 /* ═══════════════════════════════════════════════
    EVENT HANDLERS & INIT
