@@ -1,23 +1,18 @@
 import { state, loadFromStorage, loadHoseFromStorage } from './state.js';
 import { logout } from './utils.js';
 import { render, cycleLayout, setActiveView } from './render.js';
-import { openAdd, openEdit, closeModal, saveSlot, clearSlot, deleteSlot } from './modal.js';
+import {
+    openAdd, openEdit, closeModal, saveSlot, clearSlot, deleteSlot,
+    openHoseAdd, openHoseEdit, closeHoseModal, saveHose, deleteHose,
+    toggleHosePartyDropdown, openHoseNewPartyInput, confirmHoseNewParty,
+    toggleHoseLocationDropdown, setHoseLocationValue,
+} from './modal.js';
 import { addPartition } from './partition.js';
 import { toggleDropdown, selectStatus, togglePartieDropdown, openNewPartieInput, confirmNewPartie } from './dropdown.js';
-import { openTempForm, closeTempForm, saveTempEntry, toggleTempEntry } from './temperature.js';
 import {
-    openHoseAdd,
-    openHoseEdit,
-    closeHoseModal,
-    saveHose,
-    deleteHose,
-    toggleHosePartyDropdown,
-    openHoseNewPartyInput,
-    confirmHoseNewParty,
-    toggleHoseLocationDropdown,
-    setHoseLocationValue,
-} from './hose-modal.js';
-import { openNoteForm, closeNoteForm, saveNoteEntry, toggleNoteEntry } from './hose-note.js';
+    openTempForm, closeTempForm, saveTempEntry, toggleTempEntry,
+    openNoteForm, closeNoteForm, saveNoteEntry, toggleNoteEntry,
+} from './temperature.js';
 
 /* ═══════════════════════════════════════════════
    EVENT HANDLERS & INIT
@@ -72,7 +67,7 @@ function init() {
 
     // Warehouse status dropdown
     document.getElementById('status-trigger').addEventListener('click', toggleDropdown);
-    document.querySelectorAll('.cs-item').forEach(listItem => {
+    document.querySelectorAll('#status-dropdown .cs-item').forEach(listItem => {
         listItem.addEventListener('click', () => selectStatus(listItem));
     });
 
