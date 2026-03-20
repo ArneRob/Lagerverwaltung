@@ -1,12 +1,12 @@
 import { state, loadFromStorage, loadHoseFromStorage } from './state.js';
 import { logout } from './utils.js';
 import { render, cycleLayout, setActiveView } from './render.js';
+import { openAdd, openEdit, closeModal, saveSlot, clearSlot, deleteSlot } from './modals/modalCompartment.js';
 import {
-    openAdd, openEdit, closeModal, saveSlot, clearSlot, deleteSlot,
     openHoseAdd, openHoseEdit, closeHoseModal, saveHose, deleteHose,
     toggleHosePartyDropdown, openHoseNewPartyInput, confirmHoseNewParty,
     toggleHoseLocationDropdown, setHoseLocationValue,
-} from './modal.js';
+} from './modals/modalHose.js';
 import { addPartition } from './partition.js';
 import { toggleDropdown, selectStatus, togglePartieDropdown, openNewPartieInput, confirmNewPartie } from './dropdown.js';
 import {
