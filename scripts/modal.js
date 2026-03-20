@@ -4,7 +4,7 @@ import { saveCurrentPartitionState, loadPartitionContent, renderPartitionTabs, s
 import { setDropdownValue, setStatusDropdownDisabled, setVollOptionHidden } from './dropdown.js';
 import { render } from './render.js';
 import { returnPartieItemTemplate } from './template.js';
-import { renderHoseNoteList } from './temperature.js';
+import { renderWeightNoteList } from './temperature.js';
 
 /* ═══════════════════════════════════════════════
    STATUS LOGIC
@@ -322,9 +322,9 @@ function loadHoseModalContent(hose) {
             state.hoseEditingParties = [];
         }
         if (hose.notizen) {
-            state.hoseNoteEntries = [...hose.notizen];
+            state.weightNoteEntries = [...hose.notizen];
         } else {
-            state.hoseNoteEntries = [];
+            state.weightNoteEntries = [];
         }
         setHoseLocationValue(hose.standort || 'wiese');
         document.getElementById('sc-f-date').value          = hose.updated;
@@ -334,13 +334,13 @@ function loadHoseModalContent(hose) {
             'Schlauch <input id="sc-f-num" class="title-num-input" type="number" min="1" placeholder="Nr." />';
         document.getElementById('sc-f-frucht').value         = '';
         state.hoseEditingParties                             = [];
-        state.hoseNoteEntries                                = [];
+        state.weightNoteEntries                                = [];
         setHoseLocationValue('wiese');
         document.getElementById('sc-f-date').value           = nowTimestamp();
         document.getElementById('sc-del-btn').style.display  = 'none';
     }
     renderHosePartyDropdownLabel();
-    renderHoseNoteList();
+    renderWeightNoteList();
     document.getElementById('sc-pn-new-row').style.display = 'none';
 }
 
@@ -404,7 +404,7 @@ export function saveHose() {
             fruchtart,
             parties:   state.hoseEditingParties,
             standort,
-            notizen:   state.hoseNoteEntries,
+            notizen:   state.weightNoteEntries,
             updated,
         });
     } else {
@@ -413,7 +413,7 @@ export function saveHose() {
             hose.fruchtart = fruchtart;
             hose.parties   = state.hoseEditingParties;
             hose.standort  = standort;
-            hose.notizen   = state.hoseNoteEntries;
+            hose.notizen   = state.weightNoteEntries;
             hose.updated   = updated;
         }
     }

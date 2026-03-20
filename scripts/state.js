@@ -36,7 +36,7 @@ export const state = {
     hoseNextId:         1,
     editingHoseId:      null,
     hoseEditingParties: [],
-    hoseNoteEntries:    [],
+    weightNoteEntries:  [],
 };
 
 /* ═══════════════════════════════════════════════

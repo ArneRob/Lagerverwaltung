@@ -11,7 +11,7 @@ import { escHtml } from './utils.js';
  * @returns {string} HTML string.
  */
 export function returnHoseStatsTemplate(count) {
-    return `
+  return `
       <div class="stat">
         <div class="stat-val">${count}</div>
         <div class="stat-lbl">Gelegt</div>
@@ -46,17 +46,17 @@ export function returnHoseStatsTemplate(count) {
  * @returns {string} HTML string.
  */
 export function returnHoseCardTemplate(hose, lastParty) {
-    let fruchtDisplay = 'Leer';
-    if (hose.fruchtart) {
-        fruchtDisplay = escHtml(hose.fruchtart);
-    }
-    let locationLabel = '—';
-    if (hose.standort === 'wiese') {
-        locationLabel = 'Wiese';
-    } else if (hose.standort === 'acker') {
-        locationLabel = 'Acker';
-    }
-    return `
+  let fruchtDisplay = 'Leer';
+  if (hose.fruchtart) {
+    fruchtDisplay = escHtml(hose.fruchtart);
+  }
+  let locationLabel = '—';
+  if (hose.standort === 'wiese') {
+    locationLabel = 'Wiese';
+  } else if (hose.standort === 'acker') {
+    locationLabel = 'Acker';
+  }
+  return `
       <div class="slot-num">
         <p class="slot-fach">Schlauch ${hose.slotNumber}</p>
         <div class="slot-fruchtart">${fruchtDisplay}</div>
@@ -72,18 +72,15 @@ export function returnHoseCardTemplate(hose, lastParty) {
  * @param {string} entryClass - CSS classes for the entry element.
  * @returns {string} HTML string.
  */
-export function returnHoseNoteEntryTemplate(note, entryClass) {
-    return `
+export function returnWeightNoteEntryTemplate(note, entryClass) {
+  return `
       <div class="${entryClass}">
         <div class="temp-entry-preview">
-          <span class="temp-preview-range notiz-preview-text">${escHtml(note.text)}</span>
+          <span class="temp-preview-range notiz-preview-text">${escHtml(note.weight)}</span>
           <span class="temp-preview-date">${escHtml(note.savedAtDisplay)}</span>
         </div>
         <div class="temp-entry-details">
-          <div class="temp-entry-meta">
-            <span>${escHtml(note.savedAtDisplay)}</span>
-            <span>${escHtml(note.savedBy)}</span>
-          </div>
+          <span>${escHtml(note.savedBy)}</span>
         </div>
       </div>`;
 }
@@ -99,7 +96,7 @@ export function returnHoseNoteEntryTemplate(note, entryClass) {
  * @returns {string} HTML string.
  */
 export function returnTempEntryTemplate(entry, entryClass) {
-    return `
+  return `
       <div class="${entryClass}">
         <div class="temp-entry-preview">
           <span class="temp-preview-range">${entry.von}°C – ${entry.bis}°C</span>
@@ -123,7 +120,7 @@ export function returnTempEntryTemplate(entry, entryClass) {
  * @returns {string} HTML string.
  */
 export function returnStatsTemplate(slotsLength, counts) {
-    return `
+  return `
       <div class="stat">
         <div class="stat-val">${slotsLength}</div>
         <div class="stat-lbl">Gesamt</div>
@@ -160,11 +157,11 @@ export function returnStatsTemplate(slotsLength, counts) {
  * @returns {string} HTML string.
  */
 export function returnSlotCardTemplate(slot, lastParty, statusLabel, fruchtart, partitionCount) {
-    let fruchtDisplay = 'Leer';
-    if (fruchtart) fruchtDisplay = escHtml(fruchtart);
-    let multiIndicator = '';
-    if (partitionCount > 1) multiIndicator = '<span class="slot-multi">+</span>';
-    return `
+  let fruchtDisplay = 'Leer';
+  if (fruchtart) fruchtDisplay = escHtml(fruchtart);
+  let multiIndicator = '';
+  if (partitionCount > 1) multiIndicator = '<span class="slot-multi">+</span>';
+  return `
       <div class="slot-num">
         <p class="slot-fach">Lager ${slot.slotNumber}</p>
         <div class="slot-fruchtart">${fruchtDisplay}${multiIndicator}</div>
@@ -180,7 +177,7 @@ export function returnSlotCardTemplate(slot, lastParty, statusLabel, fruchtart, 
  * @returns {string} HTML string.
  */
 export function returnPartieItemTemplate(party) {
-    return `<li class="pn-item">${escHtml(party.value)}<span class="pn-item-date">${escHtml(party.addedAt)}</span></li>`;
+  return `<li class="pn-item">${escHtml(party.value)}<span class="pn-item-date">${escHtml(party.addedAt)}</span></li>`;
 }
 
 /**
@@ -189,21 +186,21 @@ export function returnPartieItemTemplate(party) {
  * @returns {string} HTML string.
  */
 export function returnPartitionPickerTemplate(partitions) {
-    const items = partitions.map((partition, index) => {
-        let fruchtDisplay = 'Keine Fruchtart';
-        if (partition.fruchtart) fruchtDisplay = escHtml(partition.fruchtart);
-        let lastParty = '—';
-        if (partition.parties && partition.parties.length > 0) {
-            lastParty = escHtml(partition.parties[partition.parties.length - 1].value);
-        }
-        return `
+  const items = partitions.map((partition, index) => {
+    let fruchtDisplay = 'Keine Fruchtart';
+    if (partition.fruchtart) fruchtDisplay = escHtml(partition.fruchtart);
+    let lastParty = '—';
+    if (partition.parties && partition.parties.length > 0) {
+      lastParty = escHtml(partition.parties[partition.parties.length - 1].value);
+    }
+    return `
           <button class="picker-card" data-idx="${index}">
             <div class="picker-label">${escHtml(partition.label)}</div>
             <div class="picker-frucht">${fruchtDisplay}</div>
             <div class="picker-partie">${lastParty}</div>
           </button>`;
-    }).join('');
-    return `<div class="picker-title">Welche Teilung möchtest du bearbeiten?</div><div class="picker-cards">${items}</div>`;
+  }).join('');
+  return `<div class="picker-title">Welche Teilung möchtest du bearbeiten?</div><div class="picker-cards">${items}</div>`;
 }
 
 /**
@@ -213,9 +210,9 @@ export function returnPartitionPickerTemplate(partitions) {
  * @returns {string} HTML string.
  */
 export function returnPartitionTabsTemplate(partitions, activeIdx) {
-    return partitions.map((partition, index) => {
-        let cls = 'partition-tab';
-        if (index === activeIdx) cls += ' active';
-        return `<button class="${cls}" type="button">${escHtml(partition.label)}</button>`;
-    }).join('');
+  return partitions.map((partition, index) => {
+    let cls = 'partition-tab';
+    if (index === activeIdx) cls += ' active';
+    return `<button class="${cls}" type="button">${escHtml(partition.label)}</button>`;
+  }).join('');
 }

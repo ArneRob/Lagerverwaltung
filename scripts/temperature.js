@@ -1,6 +1,6 @@
 import { showToast } from './utils.js';
 import { state } from './state.js';
-import { returnTempEntryTemplate, returnHoseNoteEntryTemplate } from './template.js';
+import { returnTempEntryTemplate, returnWeightNoteEntryTemplate } from './template.js';
 
 /* ═══════════════════════════════════════════════
    TEMPERATURE ENTRIES
@@ -45,9 +45,9 @@ export function renderTempList() {
  * Opens the temperature entry input overlay.
  */
 export function openTempForm() {
-    document.getElementById('t-von').value        = '';
-    document.getElementById('t-bis').value        = '';
-    document.getElementById('t-sicht').value      = '';
+    document.getElementById('t-von').value = '';
+    document.getElementById('t-bis').value = '';
+    document.getElementById('t-sicht').value = '';
     document.getElementById('t-massnahmen').value = '';
     document.getElementById('temp-overlay').classList.add('open');
     document.getElementById('t-von').focus();
@@ -64,9 +64,9 @@ export function closeTempForm() {
  * Validates and saves a new temperature entry to the state.
  */
 export function saveTempEntry() {
-    const von        = parseFloat(document.getElementById('t-von').value);
-    const bis        = parseFloat(document.getElementById('t-bis').value);
-    const sicht      = document.getElementById('t-sicht').value.trim();
+    const von = parseFloat(document.getElementById('t-von').value);
+    const bis = parseFloat(document.getElementById('t-bis').value);
+    const sicht = document.getElementById('t-sicht').value.trim();
     const massnahmen = document.getElementById('t-massnahmen').value.trim();
 
     if (isNaN(von) || document.getElementById('t-von').value === '') {
@@ -77,8 +77,8 @@ export function saveTempEntry() {
         showToast('Bitte Temperatur "bis" eingeben.');
         return;
     }
-    if (!sicht)      { showToast('Bitte Sichtkontrolle eingeben.');           return; }
-    if (!massnahmen) { showToast('Bitte durchgeführte Maßnahmen eingeben.');  return; }
+    if (!sicht) { showToast('Bitte Sichtkontrolle eingeben.'); return; }
+    if (!massnahmen) { showToast('Bitte durchgeführte Maßnahmen eingeben.'); return; }
 
     const now = new Date();
     state.tempEntries.push({
@@ -86,10 +86,10 @@ export function saveTempEntry() {
         bis,
         sicht,
         massnahmen,
-        savedBy:        localStorage.getItem('lager_user') || 'Unbekannt',
-        savedAtMs:      now.getTime(),
+        savedBy: localStorage.getItem('lager_user') || 'Unbekannt',
+        savedAtMs: now.getTime(),
         savedAtDisplay: now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                      + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
     });
     closeTempForm();
     renderTempList();
@@ -104,7 +104,7 @@ export function saveTempEntry() {
  * @param {object} note - The note entry.
  * @returns {boolean}
  */
-export function isNoteLocked(note) {
+export function isWeightNoteLocked(note) {
     return Date.now() - note.savedAtMs > 60000;
 }
 
@@ -112,62 +112,77 @@ export function isNoteLocked(note) {
  * Toggles a note entry open or closed.
  * @param {HTMLElement} entryEl - The entry element.
  */
-export function toggleNoteEntry(entryEl) {
+export function toggleWeightNoteEntry(entryEl) {
     entryEl.classList.toggle('open');
 }
 
 /**
- * Renders the note list inside the hose modal.
+ * Renders the Weight list inside the hose modal.
  */
-export function renderHoseNoteList() {
-    const listEl = document.getElementById('sc-notiz-list');
+export function renderWeightNoteList() {
+    const listEl = document.getElementById('weight-note-list');
     if (!listEl) return;
-    if (state.hoseNoteEntries.length === 0) {
-        listEl.innerHTML = '<div class="temp-empty">Noch keine Notizen</div>';
+    let total = 0
+    if (state.weightNoteEntries.length === 0) {
+        renderTotalWeight(total)
+        listEl.innerHTML = '<div class="temp-empty">Noch kein Gewicht</div>';
         return;
     }
-    listEl.innerHTML = state.hoseNoteEntries.map((note) => {
+    listEl.innerHTML = state.weightNoteEntries.map((note) => {
         let entryClass = 'temp-entry';
-        if (isNoteLocked(note)) {
+        total += note.weight
+        if (isWeightNoteLocked(note)) {
             entryClass += ' temp-locked';
         }
-        return returnHoseNoteEntryTemplate(note, entryClass);
+        return returnWeightNoteEntryTemplate(note, entryClass);
     }).join('');
+    renderTotalWeight(total)
+}
+
+
+/**
+ * inserts total calculated number of all weights from note.weight into weight-note-total elem.
+ * @param {number} total - The total calculated number out of note.weights
+ */
+function renderTotalWeight(total) {
+    let totalDiv = document.getElementById('weight-note-total')
+    if (!totalDiv) return;
+    totalDiv.innerHTML = total
 }
 
 /**
  * Opens the note input overlay.
  */
-export function openNoteForm() {
-    document.getElementById('sn-text').value = '';
-    document.getElementById('schlauch-notiz-overlay').classList.add('open');
-    document.getElementById('sn-text').focus();
+export function openWeightNoteForm() {
+    document.getElementById('weight-note-text').value = '';
+    document.getElementById('weight-note-overlay').classList.add('open');
+    document.getElementById('weight-note-text').focus();
 }
 
 /**
  * Closes the note input overlay.
  */
-export function closeNoteForm() {
-    document.getElementById('schlauch-notiz-overlay').classList.remove('open');
+export function closeWeightNoteForm() {
+    document.getElementById('weight-note-overlay').classList.remove('open');
 }
 
 /**
- * Saves a new note entry to the state and re-renders the note list.
+ * Saves a new weight note entry to the state and re-renders the weight list.
  */
-export function saveNoteEntry() {
-    const text = document.getElementById('sn-text').value.trim();
-    if (!text) {
-        showToast('Bitte einen Notiztext eingeben.');
+export function saveWeightNoteEntry() {
+    const text = document.getElementById('weight-note-text').value.trim();
+    const weight = parseFloat(text, 10)
+    if (isNaN(weight)) {
+        showToast('Bitte eine Zahl eingeben.');
         return;
     }
     const now = new Date();
-    state.hoseNoteEntries.push({
-        text,
-        savedBy:        localStorage.getItem('lager_user') || 'Unbekannt',
-        savedAtMs:      now.getTime(),
-        savedAtDisplay: now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                      + ' ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    state.weightNoteEntries.push({
+        weight,
+        savedBy: localStorage.getItem('lager_user') || 'Unbekannt',
+        savedAtMs: now.getTime(),
+        savedAtDisplay: now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
     });
-    closeNoteForm();
-    renderHoseNoteList();
+    closeWeightNoteForm();
+    renderWeightNoteList();
 }

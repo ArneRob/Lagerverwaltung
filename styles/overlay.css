@@ -225,6 +225,20 @@
 }
 
 /* ── Temperaturliste ── */
+
+.temp-list-container {
+    display: flex;
+    gap: 5px;
+}
+
+.singleWeightListContainer {
+    width: 100%;
+}
+
+.totalWeightContainer {
+    width: 80%;
+}
+
 .temp-list {
     max-height: 100px;
     overflow-y: auto;
@@ -354,6 +368,6 @@
     z-index: 210;
 }
 
-#schlauch-notiz-overlay {
+#weight-note-overlay {
     z-index: 210;
 }

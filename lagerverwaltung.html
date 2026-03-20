@@ -59,67 +59,67 @@
     <div class="modal">
       <div id="partition-picker" class="partition-picker" style="display:none"></div>
       <div id="modal-content">
-      <div class="modal-header">
-        <h3 id="modal-title">Lager bearbeiten</h3>
-        <button class="btn" id="add-partition-btn" type="button">+ Teilung</button>
-      </div>
-      <div id="partition-tabs" class="partition-tabs" style="display:none"></div>
-      <div class="field">
-        <label>Fruchtart</label>
-        <input id="f-frucht" type="text" placeholder="z.B. Weizen" />
-      </div>
-      <div class="field">
-        <label>Partie-Nummer</label>
-        <div class="partie-row">
-          <div class="custom-select partie-dropdown" id="partie-dropdown">
-            <button class="cs-trigger" id="partie-trigger" type="button">
-              <span class="cs-label" id="pn-label">Keine vorhanden</span>
+        <div class="modal-header">
+          <h3 id="modal-title">Lager bearbeiten</h3>
+          <button class="btn" id="add-partition-btn" type="button">+ Teilung</button>
+        </div>
+        <div id="partition-tabs" class="partition-tabs" style="display:none"></div>
+        <div class="field">
+          <label>Fruchtart</label>
+          <input id="f-frucht" type="text" placeholder="z.B. Weizen" />
+        </div>
+        <div class="field">
+          <label>Partie-Nummer</label>
+          <div class="partie-row">
+            <div class="custom-select partie-dropdown" id="partie-dropdown">
+              <button class="cs-trigger" id="partie-trigger" type="button">
+                <span class="cs-label" id="pn-label">Keine vorhanden</span>
+                <span class="cs-arrow">▾</span>
+              </button>
+              <ul class="cs-list" id="pn-list"></ul>
+            </div>
+            <button class="btn" type="button" id="partie-add-btn">+ Hinzufügen</button>
+          </div>
+          <div class="pn-new-row" id="pn-new-row">
+            <input id="pn-new-input" type="text" placeholder="z.B. 66-1678" />
+            <button class="btn primary" type="button" id="pn-ok-btn">OK</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <div class="custom-select" id="status-dropdown">
+            <button class="cs-trigger" id="status-trigger" type="button">
+              <span class="cs-label" id="cs-label">Leer</span>
               <span class="cs-arrow">▾</span>
             </button>
-            <ul class="cs-list" id="pn-list"></ul>
+            <ul class="cs-list" id="cs-list">
+              <li class="cs-item" data-value="leer"><span class="badge leer">Leer</span></li>
+              <li class="cs-item" data-value="voll"><span class="badge voll">Voll mit Ware</span></li>
+              <li class="cs-item" data-value="gereinigt"><span class="badge gereinigt">Gereinigt</span></li>
+              <li class="cs-item" data-value="reserviert"><span class="badge reserviert">Reserviert</span></li>
+            </ul>
           </div>
-          <button class="btn" type="button" id="partie-add-btn">+ Hinzufügen</button>
+          <input type="hidden" id="f-status" />
         </div>
-        <div class="pn-new-row" id="pn-new-row">
-          <input id="pn-new-input" type="text" placeholder="z.B. 66-1678" />
-          <button class="btn primary" type="button" id="pn-ok-btn">OK</button>
+        <div class="field">
+          <label>Temperaturen in °C</label>
+          <div class="temp-list" id="temp-list"></div>
+          <button class="btn temp-add-btn" type="button" id="temp-add-btn">+ Temperatureintrag hinzufügen</button>
         </div>
-      </div>
-      <div class="field">
-        <label>Status</label>
-        <div class="custom-select" id="status-dropdown">
-          <button class="cs-trigger" id="status-trigger" type="button">
-            <span class="cs-label" id="cs-label">Leer</span>
-            <span class="cs-arrow">▾</span>
-          </button>
-          <ul class="cs-list" id="cs-list">
-            <li class="cs-item" data-value="leer"><span class="badge leer">Leer</span></li>
-            <li class="cs-item" data-value="voll"><span class="badge voll">Voll mit Ware</span></li>
-            <li class="cs-item" data-value="gereinigt"><span class="badge gereinigt">Gereinigt</span></li>
-            <li class="cs-item" data-value="reserviert"><span class="badge reserviert">Reserviert</span></li>
-          </ul>
+        <div class="field">
+          <label>Zuletzt geändert</label>
+          <input id="f-date" type="text" readonly />
         </div>
-        <input type="hidden" id="f-status" />
-      </div>
-      <div class="field">
-        <label>Temperaturen in °C</label>
-        <div class="temp-list" id="temp-list"></div>
-        <button class="btn temp-add-btn" type="button" id="temp-add-btn">+ Temperatureintrag hinzufügen</button>
-      </div>
-      <div class="field">
-        <label>Zuletzt geändert</label>
-        <input id="f-date" type="text" readonly />
-      </div>
-      <div class="modal-actions">
-        <div class="modal-actions-left">
-          <button class="btn warning" id="clear-btn" style="display:none">Leeren</button>
-          <button class="btn danger" id="del-btn">Löschen</button>
+        <div class="modal-actions">
+          <div class="modal-actions-left">
+            <button class="btn warning" id="clear-btn" style="display:none">Leeren</button>
+            <button class="btn danger" id="del-btn">Löschen</button>
+          </div>
+          <div class="modal-actions-right">
+            <button class="btn" id="modal-cancel-btn">Abbrechen</button>
+            <button class="btn primary" id="modal-save-btn">Speichern</button>
+          </div>
         </div>
-        <div class="modal-actions-right">
-          <button class="btn" id="modal-cancel-btn">Abbrechen</button>
-          <button class="btn primary" id="modal-save-btn">Speichern</button>
-        </div>
-      </div>
       </div><!-- end modal-content -->
     </div>
   </div>
@@ -195,9 +195,18 @@
         <input type="hidden" id="sc-f-standort" value="wiese" />
       </div>
       <div class="field">
-        <label>Notizen</label>
-        <div class="temp-list" id="sc-notiz-list"></div>
-        <button class="btn temp-add-btn" type="button" id="sc-notiz-add-btn">+ Notiz hinzufügen</button>
+
+        <div class="temp-list-container">
+          <div class="singleWeightListContainer">
+            <label>Tonnage</label>
+            <div class="temp-list" id="weight-note-list"></div>
+          </div>
+          <div class="totalWeightContainer">
+            <label>Gesamt</label>
+            <div class="temp-list temp-entry" id="weight-note-total">---</div>
+          </div>
+        </div>
+        <button class="btn temp-add-btn" type="button" id="weight-note-add-btn">+ Gewicht hinzufügen</button>
       </div>
       <div class="field">
         <label>Zuletzt geändert</label>
@@ -216,16 +225,16 @@
   </div>
 
   <!-- Schlauch Notiz-Overlay -->
-  <div class="overlay" id="schlauch-notiz-overlay">
+  <div class="overlay" id="weight-note-overlay">
     <div class="modal">
-      <h3>Notiz</h3>
+      <h3>Tonnage</h3>
       <div class="field" style="margin-top:1rem">
-        <label>Notiztext</label>
-        <textarea id="sn-text" placeholder="z.B. Schlauch beschädigt..."></textarea>
+        <label>Gewicht in T</label>
+        <textarea id="weight-note-text" placeholder="z.B. 50"></textarea>
       </div>
       <div class="modal-actions">
-        <button class="btn" type="button" id="sn-cancel-btn">Abbrechen</button>
-        <button class="btn primary" type="button" id="sn-save-btn">Speichern</button>
+        <button class="btn" type="button" id="weight-note-cancel-btn">Abbrechen</button>
+        <button class="btn primary" type="button" id="weight-note-save-btn">Speichern</button>
       </div>
     </div>
   </div>

@@ -11,7 +11,7 @@ import { addPartition } from './partition.js';
 import { toggleDropdown, selectStatus, togglePartieDropdown, openNewPartieInput, confirmNewPartie } from './dropdown.js';
 import {
     openTempForm, closeTempForm, saveTempEntry, toggleTempEntry,
-    openNoteForm, closeNoteForm, saveNoteEntry, toggleNoteEntry,
+    openWeightNoteForm, closeWeightNoteForm, saveWeightNoteEntry, toggleWeightNoteEntry,
 } from './temperature.js';
 
 /* ═══════════════════════════════════════════════
@@ -165,17 +165,17 @@ function initHoseLocationDropdown() {
 /**
  * Registriert Event-Handler für das Schlauch-Notiz-Overlay (Buttons und Listen-Delegation).
  */
-function initHoseNoteOverlay() {
-    document.getElementById('schlauch-notiz-overlay').addEventListener('click', (event) => {
-        if (event.target.id === 'schlauch-notiz-overlay') closeNoteForm();
+function initWeightNoteOverlay() {
+    document.getElementById('weight-note-overlay').addEventListener('click', (event) => {
+        if (event.target.id === 'weight-note-overlay') closeWeightNoteForm();
     });
-    document.getElementById('sc-notiz-add-btn').addEventListener('click', openNoteForm);
-    document.getElementById('sn-cancel-btn').addEventListener('click', closeNoteForm);
-    document.getElementById('sn-save-btn').addEventListener('click', saveNoteEntry);
+    document.getElementById('weight-note-add-btn').addEventListener('click', openWeightNoteForm);
+    document.getElementById('weight-note-cancel-btn').addEventListener('click', closeWeightNoteForm);
+    document.getElementById('weight-note-save-btn').addEventListener('click', saveWeightNoteEntry);
 
-    document.getElementById('sc-notiz-list').addEventListener('click', (event) => {
+    document.getElementById('weight-note-list').addEventListener('click', (event) => {
         const entry = event.target.closest('.temp-entry');
-        if (entry) toggleNoteEntry(entry);
+        if (entry) toggleWeightNoteEntry(entry);
     });
 }
 
@@ -238,7 +238,7 @@ function init() {
     initHoseModal();
     initHosePartyDropdown();
     initHoseLocationDropdown();
-    initHoseNoteOverlay();
+    initWeightNoteOverlay();
     initKeyboardShortcuts();
     initDropdownOutsideClick();
 }
