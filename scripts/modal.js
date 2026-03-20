@@ -308,40 +308,68 @@ export function closeHoseModal() {
 }
 
 /**
+ * Populates modal fields for an existing hose entry.
+ * @param {object} hose - The existing hose data object.
+ */
+function loadExistingHoseData(hose) {
+    document.getElementById('sc-modal-title').textContent = `Schlauch ${hose.slotNumber}`;
+    document.getElementById('sc-f-frucht').value          = hose.fruchtart || '';
+    setHoseLocationValue(hose.standort || 'wiese');
+    document.getElementById('sc-f-date').value          = hose.updated;
+    document.getElementById('sc-del-btn').style.display = 'inline-block';
+}
+
+/**
+ * Resets modal fields to defaults for a new hose entry.
+ */
+function loadNewHoseDefaults() {
+    document.getElementById('sc-modal-title').innerHTML =
+        'Schlauch <input id="sc-f-num" class="title-num-input" type="number" min="1" placeholder="Nr." />';
+    document.getElementById('sc-f-frucht').value        = '';
+    setHoseLocationValue('wiese');
+    document.getElementById('sc-f-date').value          = nowTimestamp();
+    document.getElementById('sc-del-btn').style.display = 'none';
+}
+
+/**
+ * Loads hose parties and weight notes into state.
+ * @param {object|null} hose - The existing hose data or null for a new entry.
+ */
+function loadHoseStateEntries(hose) {
+    if (hose && hose.parties) {
+        state.hoseEditingParties = hose.parties.map(party => ({ ...party }));
+    } else {
+        state.hoseEditingParties = [];
+    }
+    if (hose && hose.notizen) {
+        state.weightNoteEntries = [...hose.notizen];
+    } else {
+        state.weightNoteEntries = [];
+    }
+}
+
+/**
+ * Renders the party dropdown label, weight note list and hides the new-party row.
+ */
+function finalizeHoseModal() {
+    renderHosePartyDropdownLabel();
+    renderWeightNoteList();
+    document.getElementById('sc-pn-new-row').style.display = 'none';
+}
+
+/**
  * Populates all modal fields from an existing hose data object,
  * or resets them to an empty state for a new entry.
  * @param {object|null} hose - Existing hose data or null for a new entry.
  */
 function loadHoseModalContent(hose) {
     if (hose) {
-        document.getElementById('sc-modal-title').textContent = `Schlauch ${hose.slotNumber}`;
-        document.getElementById('sc-f-frucht').value          = hose.fruchtart || '';
-        if (hose.parties) {
-            state.hoseEditingParties = hose.parties.map(party => ({ ...party }));
-        } else {
-            state.hoseEditingParties = [];
-        }
-        if (hose.notizen) {
-            state.weightNoteEntries = [...hose.notizen];
-        } else {
-            state.weightNoteEntries = [];
-        }
-        setHoseLocationValue(hose.standort || 'wiese');
-        document.getElementById('sc-f-date').value          = hose.updated;
-        document.getElementById('sc-del-btn').style.display = 'inline-block';
+        loadExistingHoseData(hose);
     } else {
-        document.getElementById('sc-modal-title').innerHTML =
-            'Schlauch <input id="sc-f-num" class="title-num-input" type="number" min="1" placeholder="Nr." />';
-        document.getElementById('sc-f-frucht').value         = '';
-        state.hoseEditingParties                             = [];
-        state.weightNoteEntries                                = [];
-        setHoseLocationValue('wiese');
-        document.getElementById('sc-f-date').value           = nowTimestamp();
-        document.getElementById('sc-del-btn').style.display  = 'none';
+        loadNewHoseDefaults();
     }
-    renderHosePartyDropdownLabel();
-    renderWeightNoteList();
-    document.getElementById('sc-pn-new-row').style.display = 'none';
+    loadHoseStateEntries(hose);
+    finalizeHoseModal();
 }
 
 /**
