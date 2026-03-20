@@ -1,9 +1,7 @@
 import { showToast, nowTimestamp } from '../utils.js';
 import { state, saveHoseToStorage } from '../state.js';
 import { render } from '../render.js';
-import { returnPartieItemTemplate } from '../template.js';
-import { renderWeightNoteList } from '../temperature.js';
-
+import { returnPartieItemTemplate, returnWeightNoteEntryTemplate } from '../template.js';
 
 /* ═══════════════════════════════════════════════
    HOSE MODAL – OPEN / CLOSE
@@ -120,50 +118,92 @@ function resolveHoseNumber() {
 }
 
 /**
- * Saves the current hose entry (new or edited) to the state and storage.
+ * Validates that at least one party number has been added before saving.
+ * @returns {boolean} True if valid, false otherwise.
  */
-export function saveHose() {
+function validateHoseSave() {
     if (state.hoseEditingParties.length === 0) {
         showToast('Bitte mindestens eine Partie-Nummer hinzufügen.');
-        return;
+        return false;
     }
+    return true;
+}
 
-    const slotNumber = resolveHoseNumber();
-    const fruchtart  = document.getElementById('sc-f-frucht').value.trim();
-    const standort   = document.getElementById('sc-f-standort').value;
-    const updated    = nowTimestamp();
-    const isNew      = state.editingHoseId === null;
+/**
+ * Reads all relevant form field values from the hose modal.
+ * @returns {{ slotNumber: number, fruchtart: string, standort: string, updated: string }}
+ */
+function readHoseFormData() {
+    return {
+        slotNumber: resolveHoseNumber(),
+        fruchtart:  document.getElementById('sc-f-frucht').value.trim(),
+        standort:   document.getElementById('sc-f-standort').value,
+        updated:    nowTimestamp(),
+    };
+}
 
-    if (isNew) {
-        state.hoseSlots.push({
-            id:        state.hoseNextId++,
-            slotNumber,
-            fruchtart,
-            parties:   state.hoseEditingParties,
-            standort,
-            notizen:   state.weightNoteEntries,
-            updated,
-        });
-    } else {
-        const hose = state.hoseSlots.find(hoseEntry => hoseEntry.id === state.editingHoseId);
-        if (hose) {
-            hose.fruchtart = fruchtart;
-            hose.parties   = state.hoseEditingParties;
-            hose.standort  = standort;
-            hose.notizen   = state.weightNoteEntries;
-            hose.updated   = updated;
-        }
+/**
+ * Pushes a new hose entry into the state.
+ * @param {{ slotNumber: number, fruchtart: string, standort: string, updated: string }} formData
+ */
+function createNewHose(formData) {
+    state.hoseSlots.push({
+        id:        state.hoseNextId++,
+        slotNumber: formData.slotNumber,
+        fruchtart:  formData.fruchtart,
+        parties:    state.hoseEditingParties,
+        standort:   formData.standort,
+        notizen:    state.weightNoteEntries,
+        updated:    formData.updated,
+    });
+}
+
+/**
+ * Updates an existing hose entry in the state with the given form data.
+ * @param {{ fruchtart: string, standort: string, updated: string }} formData
+ */
+function updateExistingHose(formData) {
+    const hose = state.hoseSlots.find(hoseEntry => hoseEntry.id === state.editingHoseId);
+    if (hose) {
+        hose.fruchtart = formData.fruchtart;
+        hose.parties   = state.hoseEditingParties;
+        hose.standort  = formData.standort;
+        hose.notizen   = state.weightNoteEntries;
+        hose.updated   = formData.updated;
     }
+}
 
+/**
+ * Persists the state, closes the modal, re-renders, and notifies the user.
+ * @param {boolean} isNew - Whether a new hose entry was created.
+ */
+function finalizeHoseSave(isNew) {
     saveHoseToStorage();
     closeHoseModal();
     render();
-
     if (isNew) {
         showToast('✓ Schlauch hinzugefügt');
     } else {
         showToast('✓ Schlauch gespeichert');
     }
+}
+
+/**
+ * Saves the current hose entry (new or edited) to the state and storage.
+ */
+export function saveHose() {
+    if (!validateHoseSave()) return;
+
+    const formData = readHoseFormData();
+    const isNew    = state.editingHoseId === null;
+
+    if (isNew) {
+        createNewHose(formData);
+    } else {
+        updateExistingHose(formData);
+    }
+
+    finalizeHoseSave(isNew);
 }
 
 /**
@@ -284,4 +324,108 @@ export function setHoseLocationValue(value) {
         item.classList.toggle('selected', item.dataset.value === value);
     });
     document.getElementById('sc-standort-dropdown').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════════
+   HOSE MODAL – WEIGHT NOTES
+═══════════════════════════════════════════════ */
+
+/**
+ * Returns true if a weight note entry is locked (older than 1 minute).
+ * @param {object} note - The weight note entry.
+ * @returns {boolean}
+ */
+export function isWeightNoteLocked(note) {
+    return Date.now() - note.savedAtMs > 60000;
+}
+
+/**
+ * Toggles a weight note entry open or closed.
+ * @param {HTMLElement} entryEl - The entry element.
+ */
+export function toggleWeightNoteEntry(entryEl) {
+    entryEl.classList.toggle('open');
+}
+
+/**
+ * Inserts the total calculated weight into the weight-note-total element.
+ * @param {number} total - The sum of all note weights.
+ */
+function renderTotalWeight(total) {
+    const totalDiv = document.getElementById('weight-note-total');
+    if (!totalDiv) return;
+    totalDiv.innerHTML = total;
+}
+
+/**
+ * Renders the weight note list inside the hose modal.
+ */
+export function renderWeightNoteList() {
+    const listEl = document.getElementById('weight-note-list');
+    if (!listEl) return;
+    let total = 0;
+    if (state.weightNoteEntries.length === 0) {
+        renderTotalWeight(total);
+        listEl.innerHTML = '<div class="temp-empty">Noch kein Gewicht</div>';
+        return;
+    }
+    listEl.innerHTML = state.weightNoteEntries.map((note) => {
+        let entryClass = 'temp-entry';
+        total += note.weight;
+        if (isWeightNoteLocked(note)) {
+            entryClass += ' temp-locked';
+        }
+        return returnWeightNoteEntryTemplate(note, entryClass);
+    }).join('');
+    renderTotalWeight(total);
+}
+
+/**
+ * Opens the weight note input overlay.
+ */
+export function openWeightNoteForm() {
+    document.getElementById('weight-note-text').value = '';
+    document.getElementById('weight-note-overlay').classList.add('open');
+    document.getElementById('weight-note-text').focus();
+}
+
+/**
+ * Closes the weight note input overlay.
+ */
+export function closeWeightNoteForm() {
+    document.getElementById('weight-note-overlay').classList.remove('open');
+}
+
+/**
+ * Persists only the weight notes of the currently edited hose to storage.
+ * Used for quick saves without closing the modal.
+ */
+function quickSaveHoseNotizen() {
+    if (state.editingHoseId === null) return;
+    const hose = state.hoseSlots.find(hoseEntry => hoseEntry.id === state.editingHoseId);
+    if (!hose) return;
+    hose.notizen = [...state.weightNoteEntries];
+    saveHoseToStorage();
+}
+
+/**
+ * Validates and saves a new weight note entry to the state and re-renders the list.
+ */
+export function saveWeightNoteEntry() {
+    const text   = document.getElementById('weight-note-text').value.trim();
+    const weight = parseFloat(text);
+    if (isNaN(weight)) {
+        showToast('Bitte eine Zahl eingeben.');
+        return;
+    }
+    const now = new Date();
+    state.weightNoteEntries.push({
+        weight,
+        savedBy:        localStorage.getItem('lager_user') || 'Unbekannt',
+        savedAtMs:      now.getTime(),
+        savedAtDisplay: now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    });
+    closeWeightNoteForm();
+    renderWeightNoteList();
+    quickSaveHoseNotizen();
 }

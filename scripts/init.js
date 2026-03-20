@@ -6,13 +6,11 @@ import {
     openHoseAdd, openHoseEdit, closeHoseModal, saveHose, deleteHose,
     toggleHosePartyDropdown, openHoseNewPartyInput, confirmHoseNewParty,
     toggleHoseLocationDropdown, setHoseLocationValue,
+    openWeightNoteForm, closeWeightNoteForm, saveWeightNoteEntry, toggleWeightNoteEntry,
 } from './modals/modalHose.js';
 import { addPartition } from './partition.js';
 import { toggleDropdown, selectStatus, togglePartieDropdown, openNewPartieInput, confirmNewPartie } from './dropdown.js';
-import {
-    openTempForm, closeTempForm, saveTempEntry, toggleTempEntry,
-    openWeightNoteForm, closeWeightNoteForm, saveWeightNoteEntry, toggleWeightNoteEntry,
-} from './temperature.js';
+import { openTempForm, closeTempForm, saveTempEntry, toggleTempEntry } from './temperature.js';
 
 /* ═══════════════════════════════════════════════
    EVENT HANDLERS & INIT

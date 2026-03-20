@@ -1,6 +1,6 @@
 import { showToast } from './utils.js';
 import { state } from './state.js';
-import { returnTempEntryTemplate, returnWeightNoteEntryTemplate } from './template.js';
+import { returnTempEntryTemplate } from './template.js';
 
 /* ═══════════════════════════════════════════════
    TEMPERATURE ENTRIES
@@ -93,96 +93,4 @@ export function saveTempEntry() {
     });
     closeTempForm();
     renderTempList();
-}
-
-/* ═══════════════════════════════════════════════
-   HOSE NOTES
-═══════════════════════════════════════════════ */
-
-/**
- * Returns true if a note entry is locked (older than 1 minute).
- * @param {object} note - The note entry.
- * @returns {boolean}
- */
-export function isWeightNoteLocked(note) {
-    return Date.now() - note.savedAtMs > 60000;
-}
-
-/**
- * Toggles a note entry open or closed.
- * @param {HTMLElement} entryEl - The entry element.
- */
-export function toggleWeightNoteEntry(entryEl) {
-    entryEl.classList.toggle('open');
-}
-
-/**
- * Renders the Weight list inside the hose modal.
- */
-export function renderWeightNoteList() {
-    const listEl = document.getElementById('weight-note-list');
-    if (!listEl) return;
-    let total = 0
-    if (state.weightNoteEntries.length === 0) {
-        renderTotalWeight(total)
-        listEl.innerHTML = '<div class="temp-empty">Noch kein Gewicht</div>';
-        return;
-    }
-    listEl.innerHTML = state.weightNoteEntries.map((note) => {
-        let entryClass = 'temp-entry';
-        total += note.weight
-        if (isWeightNoteLocked(note)) {
-            entryClass += ' temp-locked';
-        }
-        return returnWeightNoteEntryTemplate(note, entryClass);
-    }).join('');
-    renderTotalWeight(total)
-}
-
-
-/**
- * inserts total calculated number of all weights from note.weight into weight-note-total elem.
- * @param {number} total - The total calculated number out of note.weights
- */
-function renderTotalWeight(total) {
-    let totalDiv = document.getElementById('weight-note-total')
-    if (!totalDiv) return;
-    totalDiv.innerHTML = total
-}
-
-/**
- * Opens the note input overlay.
- */
-export function openWeightNoteForm() {
-    document.getElementById('weight-note-text').value = '';
-    document.getElementById('weight-note-overlay').classList.add('open');
-    document.getElementById('weight-note-text').focus();
-}
-
-/**
- * Closes the note input overlay.
- */
-export function closeWeightNoteForm() {
-    document.getElementById('weight-note-overlay').classList.remove('open');
-}
-
-/**
- * Saves a new weight note entry to the state and re-renders the weight list.
- */
-export function saveWeightNoteEntry() {
-    const text = document.getElementById('weight-note-text').value.trim();
-    const weight = parseFloat(text, 10)
-    if (isNaN(weight)) {
-        showToast('Bitte eine Zahl eingeben.');
-        return;
-    }
-    const now = new Date();
-    state.weightNoteEntries.push({
-        weight,
-        savedBy: localStorage.getItem('lager_user') || 'Unbekannt',
-        savedAtMs: now.getTime(),
-        savedAtDisplay: now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
-    });
-    closeWeightNoteForm();
-    renderWeightNoteList();
 }
