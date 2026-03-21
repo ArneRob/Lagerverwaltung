@@ -1,5 +1,5 @@
 import { showToast } from './utils.js';
-import { state } from './state.js';
+import { state, saveToStorage } from './state.js';
 import { returnTempEntryTemplate } from './template.js';
 
 /* ═══════════════════════════════════════════════
@@ -93,4 +93,17 @@ export function saveTempEntry() {
     });
     closeTempForm();
     renderTempList();
+    quickSaveTemperatureNotes()
+}
+
+/**
+ * Persists only the notes of the currently edited temperature to storage.
+ * Used for quick saves without closing the modal.
+ */
+function quickSaveTemperatureNotes() {
+    if (state.editingId === null) return;
+    const currentSlot = state.slots.find(slot => slot.id === state.editingId);
+    if (!currentSlot) return;
+    currentSlot.partitions[state.activePartitionIdx].temperatures = [...state.tempEntries];
+    saveToStorage();
 }

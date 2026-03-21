@@ -400,7 +400,7 @@ export function closeWeightNoteForm() {
  * Persists only the weight notes of the currently edited hose to storage.
  * Used for quick saves without closing the modal.
  */
-function quickSaveHoseNotizen() {
+function quickSaveHoseNotes() {
     if (state.editingHoseId === null) return;
     const hose = state.hoseSlots.find(hoseEntry => hoseEntry.id === state.editingHoseId);
     if (!hose) return;
@@ -427,5 +427,5 @@ export function saveWeightNoteEntry() {
     });
     closeWeightNoteForm();
     renderWeightNoteList();
-    quickSaveHoseNotizen();
+    quickSaveHoseNotes();
 }
