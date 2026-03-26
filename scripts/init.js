@@ -1,4 +1,5 @@
 import { state, loadFromStorage, loadHoseFromStorage } from './state.js';
+import { importArchive } from './archiveView.js';
 import { logout } from './utils.js';
 import { render, cycleLayout, setActiveView } from './render.js';
 import { openAdd, openEdit, closeModal, saveSlot, clearSlot, deleteSlot } from './modals/modalCompartment.js';
@@ -32,6 +33,7 @@ function initApp() {
  */
 function initTopbar() {
     document.getElementById('logout-btn').addEventListener('click', logout);
+    document.getElementById('import-archiv-btn').addEventListener('click', importArchive);
     document.getElementById('layout-btn').addEventListener('click', cycleLayout);
     document.getElementById('add-btn').addEventListener('click', () => {
         if (state.activeView === 'schlauch') {
@@ -46,7 +48,7 @@ function initTopbar() {
  * Registriert Event-Handler für die Ansichts-Tabs (Lager / Schlauch).
  */
 function initViewTabs() {
-    document.getElementById('tab-lager').addEventListener('click',    () => setActiveView('lager'));
+    document.getElementById('tab-lager').addEventListener('click', () => setActiveView('lager'));
     document.getElementById('tab-schlauch').addEventListener('click', () => setActiveView('schlauch'));
 }
 
@@ -55,14 +57,14 @@ function initViewTabs() {
  */
 function initGrid() {
     document.getElementById('grid').addEventListener('click', (event) => {
-        const hoseCard   = event.target.closest('.schlauch-card');
+        const hoseCard = event.target.closest('.schlauch-card');
         const hoseAddBtn = event.target.closest('[data-action="add-schlauch"]');
-        const slotCard   = event.target.closest('.slot');
+        const slotCard = event.target.closest('.slot');
         const slotAddBtn = event.target.closest('[data-action="add-slot"]');
 
-        if (hoseCard)   { openHoseEdit(parseInt(hoseCard.dataset.schlauchId, 10)); return; }
+        if (hoseCard) { openHoseEdit(parseInt(hoseCard.dataset.schlauchId, 10)); return; }
         if (hoseAddBtn) { openHoseAdd(); return; }
-        if (slotCard)   { openEdit(parseInt(slotCard.dataset.id, 10)); return; }
+        if (slotCard) { openEdit(parseInt(slotCard.dataset.id, 10)); return; }
         if (slotAddBtn) { openAdd(); }
     });
 }
@@ -183,7 +185,7 @@ function initWeightNoteOverlay() {
 function initKeyboardShortcuts() {
     document.addEventListener('keydown', (event) => {
         const warehouseOpen = document.getElementById('overlay').classList.contains('open');
-        const hoseOpen      = document.getElementById('schlauch-overlay').classList.contains('open');
+        const hoseOpen = document.getElementById('schlauch-overlay').classList.contains('open');
 
         if (warehouseOpen) {
             if (event.key === 'Escape') { closeModal(); return; }

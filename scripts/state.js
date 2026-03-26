@@ -107,7 +107,7 @@ export function loadFromStorage() {
  * Reads and parses the archive object from localStorage.
  * @returns {Object} The parsed archive, or an empty object if none exists.
  */
-function loadArchive() {
+export function loadArchive() {
     const raw = localStorage.getItem(ARCHIVE_KEY);
     if (raw) {
         return JSON.parse(raw);
