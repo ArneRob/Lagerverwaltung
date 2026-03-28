@@ -371,3 +371,10 @@
 #weight-note-overlay {
     z-index: 210;
 }
+
+.archiveTable {
+    border-collapse: collapse;
+    font-family: monospace;
+    font-size: 13px;
+    width: 100%;
+}

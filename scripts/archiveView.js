@@ -4,6 +4,7 @@ import {
     returnArchiveDataCellTemplate,
     returnArchiveDataRowTemplate,
     returnArchiveTableTemplate,
+    returnButtonTemplate,
 } from './template.js';
 
 /* ═══════════════════════════════════════════════
@@ -221,7 +222,7 @@ function buildArchiveBodyHtml(archiveRows, columns) {
  */
 export function importArchive() {
     const archiveRows = flattenArchiveToRows();
-    let archivTableImportData = document.getElementById('archivTableImportData')
+    let archiveTableImportData = document.getElementById('archivTableImportData')
     let grainCompartmentDashboard = document.getElementById('grainCompartmentDashboard')
     if (archiveRows.length === 0) {
         alert('Kein Archiv vorhanden.');
@@ -230,6 +231,23 @@ export function importArchive() {
 
     const headerHtml = buildArchiveHeaderHtml(ARCHIVE_COLUMNS);
     const bodyHtml = buildArchiveBodyHtml(archiveRows, ARCHIVE_COLUMNS);
-    grainCompartmentDashboard.classList.add('d_none')
-    archivTableImportData.innerHTML = returnArchiveTableTemplate(headerHtml, bodyHtml);
+    grainCompartmentDashboard.classList.add('d_none');
+    archiveTableImportData.innerHTML = returnButtonTemplate("dashBoardButton", "Dashboard") + returnArchiveTableTemplate(headerHtml, bodyHtml);
+    const dashBoardButton = document.getElementById('dashBoardButton');
+    dashBoardButton.style.marginBottom = '20px';
+    dashBoardButton.addEventListener('click', returnToDashBoard);
+
+}
+
+
+/**
+ * deletes all table data in archivTableImportData 
+ * Called when the user clicks the "Dashboard" button.
+ */
+function returnToDashBoard() {
+    let archiveTableImportData = document.getElementById('archivTableImportData')
+    let grainCompartmentDashboard = document.getElementById('grainCompartmentDashboard')
+
+    archiveTableImportData.innerHTML = ""
+    grainCompartmentDashboard.classList.remove('d_none')
 }

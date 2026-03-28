@@ -213,7 +213,7 @@ export function returnPartitionPickerTemplate(partitions) {
  * @returns {string} HTML string.
  */
 export function returnArchiveHeaderCellTemplate(label) {
-    return `<th style="padding:6px 10px;background:#222;text-align:left">${escHtml(label)}</th>`;
+  return `<th style="padding:6px 10px;background:#222;text-align:left">${escHtml(label)}</th>`;
 }
 
 /**
@@ -223,7 +223,7 @@ export function returnArchiveHeaderCellTemplate(label) {
  * @returns {string} HTML string.
  */
 export function returnArchiveDataCellTemplate(value, cellStyle) {
-    return `<td style="${cellStyle}">${escHtml(value)}</td>`;
+  return `<td style="${cellStyle}">${escHtml(value)}</td>`;
 }
 
 /**
@@ -233,7 +233,7 @@ export function returnArchiveDataCellTemplate(value, cellStyle) {
  * @returns {string} HTML string.
  */
 export function returnArchiveDataRowTemplate(cellsHtml, bgColor) {
-    return `<tr style="background:${bgColor}">${cellsHtml}</tr>`;
+  return `<tr style="background:${bgColor}">${cellsHtml}</tr>`;
 }
 
 /**
@@ -243,8 +243,8 @@ export function returnArchiveDataRowTemplate(cellsHtml, bgColor) {
  * @returns {string} HTML string.
  */
 export function returnArchiveTableTemplate(headerHtml, bodyHtml) {
-    return `
-        <table border="1" style="border-collapse:collapse;font-family:monospace;font-size:13px;width:100%">
+  return `
+        <table class="archiveTable" border=1>
             <thead><tr>${headerHtml}</tr></thead>
             <tbody>${bodyHtml}</tbody>
         </table>`;
@@ -262,4 +262,10 @@ export function returnPartitionTabsTemplate(partitions, activeIdx) {
     if (index === activeIdx) cls += ' active';
     return `<button class="${cls}" type="button">${escHtml(partition.label)}</button>`;
   }).join('');
+}
+
+export function returnButtonTemplate(id, name) {
+  return `
+          <button id="${id}" class="btn">${name}</button>
+          `
 }
