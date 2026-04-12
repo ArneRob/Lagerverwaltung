@@ -53,6 +53,13 @@ body {
     width: 100%;
 }
 
+a {
+    text-decoration: none;
+    display: flex;
+    color: #f0efe9;
+    margin: 5px 0px;
+}
+
 /* ── Topbar ── */
 .topbar {
     display: flex;

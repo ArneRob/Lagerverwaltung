@@ -1,37 +1,41 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./styles/login.css">
-     <link rel="icon" type="image/x-icon" href="./assets/imgs/favicon_512.png">
-    <script src="./scripts/login.js" defer></script>
-    <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./styles/login.css">
+  <link rel="icon" type="image/x-icon" href="./assets/imgs/favicon_512.png">
+  <link rel="stylesheet" href="./styles/standart.css">
+  <script src="./scripts/login.js" defer></script>
+  <title>Login</title>
 </head>
+
 <body>
-    <div class="card" id="card">
-  <div class="logo">Lagerverwaltung</div>
-  <div class="sub"></div>
+  <div class="card" id="card">
+    <div class="logo">Lagerverwaltung</div>
+    <div class="sub"></div>
 
-  <div class="field">
-    <label>Benutzername</label>
-    <input type="text" id="inp-user" placeholder="Benutzername" autocomplete="username" value="Max" />
+    <div class="field">
+      <label>Benutzername</label>
+      <input type="text" id="inp-user" placeholder="Benutzername" autocomplete="username" value="Max" />
+    </div>
+
+    <div class="field">
+      <label>Passwort</label>
+      <input type="password" id="inp-pass" placeholder="Passwort" autocomplete="current-password" value="123" />
+    </div>
+
+    <div class="err-msg" id="err-msg">Benutzername oder Passwort falsch.</div>
+
+    <button class="btn-login" onclick="doLogin()">Anmelden</button>
+
+    <div class="hint">Nur für autorisierte Nutzer</div>
+    <a href="./datenschutz.html">Datenschutz</a>
+    <div class="WARNING" style="text-align: center; margin-top: 10px;">KEINE REGESTRIERUNG MÖGLICH DEMO NUTZUNG</div>
   </div>
-
-  <div class="field">
-    <label>Passwort</label>
-    <input type="password" id="inp-pass" placeholder="Passwort" autocomplete="current-password" value="123"/>
-  </div>
-
-  <div class="err-msg" id="err-msg">Benutzername oder Passwort falsch.</div>
-
-  <button class="btn-login" onclick="doLogin()">Anmelden</button>
-
-  <div class="hint">Nur für autorisierte Nutzer</div>
-  <a href="./datenschutz.html">Datenschutz</a>
-  <div class="WARNING" style="text-align: center; margin-top: 10px;">KEINE REGESTRIERUNG MÖGLICH DEMO NUTZUNG</div>
-</div>
 </body>
+
 </html>
