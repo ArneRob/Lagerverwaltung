@@ -112,7 +112,101 @@ export function loadArchive() {
     if (raw) {
         return JSON.parse(raw);
     }
-    return {};
+    return defaultArchive();
+}
+
+function defaultArchive() {
+    const t = (von, bis, sicht, massnahmen, savedBy, savedAtDisplay, ms) => ({
+        von, bis, sicht, massnahmen, savedBy, savedAtDisplay, savedAtMs: ms,
+    });
+
+    return {
+        'Lager 1': {
+            '14.07.2025 08:30': {
+                'Weizen': {
+                    partien: ['66-1001', '66-1002'],
+                    temperaturen: [
+                        t(11.2, 13.4, 'o.B.', 'Keine Maßnahmen erforderlich',    'Klaus Müller',     '10.05.25', 1746827200000),
+                        t(12.0, 14.1, 'leichte Erwärmung', 'Belüftung 2h aktiviert', 'Sarah Bauer',  '20.06.25', 1750377600000),
+                        t(12.8, 14.9, 'o.B.', 'Keine Maßnahmen erforderlich',    'Thomas Schneider', '14.07.25', 1752480000000),
+                    ],
+                },
+            },
+        },
+        'Lager 2': {
+            '02.08.2025 10:15': {
+                'Roggen': {
+                    partien: ['66-2201'],
+                    temperaturen: [
+                        t(10.5, 12.3, 'o.B., keine Schädlinge', 'Keine Maßnahmen erforderlich', 'Anna Weber',     '15.06.25', 1749945600000),
+                        t(11.1, 13.0, 'Geruch unauffällig',      'Keine Maßnahmen erforderlich', 'Stefan Koch',    '02.08.25', 1754092800000),
+                    ],
+                },
+            },
+        },
+        'Lager 4': {
+            '28.06.2025 14:00': {
+                'Gerste': {
+                    partien: ['23-4401', '23-4402', '23-4403'],
+                    temperaturen: [
+                        t(13.2, 15.5, 'leichte Staubentwicklung', 'Belüftung eingeschaltet',          'Julia Hoffmann', '05.05.25', 1746388800000),
+                        t(12.4, 14.3, 'o.B.',                     'Keine Maßnahmen erforderlich',     'Peter Wagner',   '01.06.25', 1748736000000),
+                        t(11.8, 13.7, 'Feuchtigkeit i.O.',         'Umschichtung für Folgewoche geplant', 'Lena Richter', '28.06.25', 1751068800000),
+                    ],
+                },
+            },
+        },
+        'Lager 7': {
+            '10.09.2025 09:45': {
+                'Dinkel': {
+                    partien: ['23-7701'],
+                    temperaturen: [
+                        t(9.8, 11.6, 'o.B.', 'Keine Maßnahmen erforderlich', 'Monika Klein',  '20.07.25', 1753056000000),
+                        t(10.3, 12.1, 'o.B.', 'Belüftung 1h aktiviert',       'Hans Schäfer',  '10.09.25', 1757462700000),
+                    ],
+                },
+            },
+        },
+        'Lager 10': {
+            '05.08.2025 11:00': {
+                'Hafer': {
+                    partien: ['66-1001', '66-1002'],
+                    temperaturen: [
+                        t(11.5, 13.8, 'o.B.', 'Keine Maßnahmen erforderlich', 'Maria Braun',      '12.06.25', 1749686400000),
+                        t(12.2, 14.5, 'leichte Erwärmung', 'Belüftungsanlage 3h aktiviert', 'Klaus Müller', '05.08.25', 1754352000000),
+                    ],
+                },
+            },
+        },
+        'Lager 14': {
+            '18.07.2025 13:30': {
+                'Weizen br.': {
+                    partien: ['23-1401', '23-1402'],
+                    temperaturen: [
+                        t(10.9, 12.7, 'Probe entnommen', 'Probe ans Labor geschickt',     'Sarah Bauer',      '01.06.25', 1748736000000),
+                        t(10.5, 12.3, 'o.B.',            'Keine Maßnahmen erforderlich',  'Thomas Schneider', '18.07.25', 1752832200000),
+                    ],
+                },
+                'SBK': {
+                    partien: ['23-1410'],
+                    temperaturen: [
+                        t(9.6, 11.4, 'o.B., keine Schädlinge', 'Keine Maßnahmen erforderlich', 'Anna Weber', '18.07.25', 1752832200000),
+                    ],
+                },
+            },
+        },
+        'Lager 22': {
+            '12.08.2025 07:00': {
+                'Triticale': {
+                    partien: ['25-2201', '25-2202'],
+                    temperaturen: [
+                        t(12.6, 14.8, 'leichte Staubentwicklung beim Öffnen', 'Kontrolle in 3 Tagen',         'Julia Hoffmann', '25.06.25', 1751846400000),
+                        t(11.9, 13.6, 'o.B.',                                  'Keine Maßnahmen erforderlich', 'Peter Wagner',   '12.08.25', 1755046800000),
+                    ],
+                },
+            },
+        },
+    };
 }
 
 /**
@@ -202,13 +296,13 @@ export function loadHoseFromStorage() {
             state.hoseSlots = JSON.parse(raw);
             state.hoseNextId = state.hoseSlots.reduce((max, hose) => Math.max(max, hose.id), 0) + 1;
         } else {
-            state.hoseSlots = [];
-            state.hoseNextId = 1;
+            state.hoseSlots = defaultHoses();
+            state.hoseNextId = state.hoseSlots.length + 1;
         }
     } catch (error) {
         console.warn('Failed to read hose data from localStorage:', error);
-        state.hoseSlots = [];
-        state.hoseNextId = 1;
+        state.hoseSlots = defaultHoses();
+        state.hoseNextId = state.hoseSlots.length + 1;
     }
 }
 
@@ -504,6 +598,81 @@ function defaultSlots() {
 }
 
 
+
+function defaultHoses() {
+    const p = (value, addedAt, ms) => ({ value, addedAt, addedAtMs: ms });
+    const n = (weight, savedBy, savedAtDisplay, ms) => ({ weight, savedBy, savedAtDisplay, savedAtMs: ms });
+
+    return [
+        // Schlauch 1 – Weizen, Wiese, 2 Partien, 3 Gewichtsnotizen
+        {
+            id: 1, slotNumber: 1, fruchtart: 'Weizen', standort: 'wiese',
+            updated: '12.09.2025 07:30',
+            parties: [
+                p('66-2501', '10.09.2025 14:15', 1757500500000),
+                p('66-2502', '12.09.2025 07:30', 1757674200000),
+            ],
+            notizen: [
+                n(42.8, 'Klaus Müller',     '10.09.25', 1757500500000),
+                n(38.5, 'Sarah Bauer',      '12.09.25', 1757674200000),
+                n(41.2, 'Thomas Schneider', '15.09.25', 1757934000000),
+            ],
+        },
+        // Schlauch 2 – Roggen, Acker, 3 Partien, 2 Gewichtsnotizen
+        {
+            id: 2, slotNumber: 2, fruchtart: 'Roggen', standort: 'acker',
+            updated: '20.09.2025 09:00',
+            parties: [
+                p('66-3301', '15.09.2025 08:00', 1757934000000),
+                p('66-3302', '18.09.2025 10:30', 1758191400000),
+                p('66-3303', '20.09.2025 09:00', 1758362400000),
+            ],
+            notizen: [
+                n(55.0, 'Julia Hoffmann', '15.09.25', 1757934000000),
+                n(49.3, 'Peter Wagner',   '20.09.25', 1758362400000),
+            ],
+        },
+        // Schlauch 3 – Gerste, Wiese, 1 Partie, 4 Gewichtsnotizen
+        {
+            id: 3, slotNumber: 3, fruchtart: 'Gerste', standort: 'wiese',
+            updated: '05.10.2025 11:45',
+            parties: [
+                p('23-4401', '01.10.2025 13:00', 1759312800000),
+            ],
+            notizen: [
+                n(60.0, 'Anna Weber',   '01.10.25', 1759312800000),
+                n(58.7, 'Stefan Koch',  '02.10.25', 1759399200000),
+                n(61.4, 'Lena Richter', '04.10.25', 1759572000000),
+                n(59.9, 'Hans Schäfer', '05.10.25', 1759658400000),
+            ],
+        },
+        // Schlauch 4 – Triticale, Acker, 2 Partien, 2 Gewichtsnotizen
+        {
+            id: 4, slotNumber: 4, fruchtart: 'Triticale', standort: 'acker',
+            updated: '08.11.2025 14:00',
+            parties: [
+                p('25-0581', '03.11.2025 09:15', 1762168500000),
+                p('25-0582', '08.11.2025 14:00', 1762600800000),
+            ],
+            notizen: [
+                n(47.6, 'Monika Klein', '03.11.25', 1762168500000),
+                n(44.1, 'Klaus Müller', '08.11.25', 1762600800000),
+            ],
+        },
+        // Schlauch 5 – Dinkel, Wiese, 2 Partien, 1 Gewichtsnotiz
+        {
+            id: 5, slotNumber: 5, fruchtart: 'Dinkel', standort: 'wiese',
+            updated: '14.11.2025 08:30',
+            parties: [
+                p('23-2201', '10.11.2025 07:45', 1762774500000),
+                p('23-2202', '14.11.2025 08:30', 1763118600000),
+            ],
+            notizen: [
+                n(36.0, 'Maria Braun', '14.11.25', 1763118600000),
+            ],
+        },
+    ];
+}
 
 /**
  * Writes a single partition entry into the currentSlots archive object.
