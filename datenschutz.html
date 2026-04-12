@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datenschutzinformation – GrainStorage Demo</title>
+    <link rel="stylesheet" href="./styles/privacyPolicy.css">
+</head>
+<body>
+
+    <h1>Datenschutzinformation – GrainStorage Demo</h1>
+    <p class="meta">
+        <strong>Stand:</strong> April 2026 &nbsp;|&nbsp;
+        <strong>Anwendung:</strong> GrainStorageDemo (öffentliches Demo-Repository)
+    </p>
+
+    <hr>
+
+    <h2>1. Verantwortlicher</h2>
+    <p>
+        Diese Anwendung ist ein öffentliches Demo-Projekt ohne kommerziellen Betrieb.<br>
+        Verantwortlich für die Bereitstellung: Arne Klimmt (GitHub-Projektinhaber)
+    </p>
+    <blockquote>
+        <p><strong>Rechtsgrundlage:</strong> Art. 13 Abs. 1 lit. a DSGVO verpflichtet den Verantwortlichen, bei der Erhebung personenbezogener Daten seinen Namen und seine Kontaktdaten mitzuteilen.</p>
+    </blockquote>
+
+    <hr>
+
+    <h2>2. Art der Anwendung</h2>
+    <p>
+        GrainStorageDemo ist eine <strong>reine Client-Anwendung</strong>, die vollständig im Browser des Nutzers ausgeführt wird.
+        Es findet <strong>keine Kommunikation mit einem externen Server</strong> statt (abgesehen von der initialen Auslieferung
+        der Dateien durch den Webserver). Es werden keine Anwendungsdaten übertragen, gespeichert oder verarbeitet außerhalb des eigenen Geräts.
+    </p>
+
+    <hr>
+
+    <h2>3. Gespeicherte Daten (lokal im Browser)</h2>
+    <p>Die Anwendung speichert Daten ausschließlich im <code>localStorage</code> des Browsers des Nutzers. Folgende Schlüssel werden verwendet:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Schlüssel</th>
+                <th>Inhalt</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td><code>lager_auth</code></td><td>Authentifizierungsstatus (Wert: <code>"true"</code> oder nicht vorhanden)</td></tr>
+            <tr><td><code>lager_user</code></td><td>Eingeloggter Benutzername (Demo: <code>"Max"</code>)</td></tr>
+            <tr><td><code>lager_slots</code></td><td>Lagerdaten: Fächer, Fruchtarten, Partienummern, Temperatureinträge</td></tr>
+            <tr><td><code>lager_col_idx</code></td><td>Layout-Einstellung (Spaltenanzahl)</td></tr>
+            <tr><td><code>lager_archiv</code></td><td>Archivierte Lagerdaten (nach Fach, Datum und Fruchtart gruppiert)</td></tr>
+            <tr><td><code>lager_schlauch_slots</code></td><td>Schlauchdaten (Schlauchverwaltung)</td></tr>
+        </tbody>
+    </table>
+
+    <p>Diese Daten verlassen das Gerät des Nutzers <strong>zu keinem Zeitpunkt</strong>.</p>
+
+    <blockquote>
+        <p>
+            <strong>Rechtsgrundlage:</strong> Der Zugriff auf den <code>localStorage</code> des Nutzers ist gemäß
+            <strong>§ 25 Abs. 2 Nr. 2 TDDDG</strong> (ehem. TTDSG) ohne Einwilligung zulässig, da die Speicherung unbedingt
+            erforderlich ist, um den vom Nutzer ausdrücklich angeforderten Dienst (die Lagerverwaltungs-App) bereitzustellen.
+            Es handelt sich ausschließlich um technisch notwendige Speicherung, die keine Tracking- oder Analysezwecke verfolgt.
+        </p>
+    </blockquote>
+
+    <hr>
+
+    <h2>4. Demo-Datensätze und Personennamen</h2>
+    <p>
+        Die Anwendung enthält <strong>vorausgefüllte Beispieldaten</strong>, darunter fiktive Personennamen
+        (z. B. „Klaus Müller", „Sarah Bauer") als Einträge im Feld <code>savedBy</code> der Temperaturprotokolle.
+        Diese Namen sind <strong>ausschließlich Demodaten</strong> und beziehen sich auf keine realen Personen.
+        Sie werden nicht für andere Zwecke verwendet.
+    </p>
+    <blockquote>
+        <p>
+            Da es sich um keine realen Personen handelt, liegt keine Verarbeitung personenbezogener Daten i. S. d.
+            <strong>Art. 4 Nr. 1 DSGVO</strong> vor. Personenbezogene Daten sind „alle Informationen, die sich auf eine
+            identifizierte oder identifizierbare natürliche Person beziehen" – fiktive Beispielnamen erfüllen dieses Kriterium nicht.
+        </p>
+    </blockquote>
+
+    <hr>
+
+    <h2>5. Authentifizierung</h2>
+    <p>
+        Der Demo-Login (Benutzername: <code>Max</code>, Passwort: <code>123</code>) ist absichtlich öffentlich im Repository
+        dokumentiert. Es handelt sich <strong>nicht</strong> um eine sichere Authentifizierung. Die Anmeldedaten sind im
+        Quellcode hinterlegt und dienen ausschließlich der Demo-Funktionalität.
+    </p>
+
+    <hr>
+
+    <h2>6. Cookies und Tracking</h2>
+    <p>
+        Die Anwendung verwendet <strong>keine Cookies</strong>, keine Tracking-Technologien, keine Analysedienste
+        (z. B. Google Analytics) und keine externen Skripte oder Ressourcen von Drittanbietern.
+    </p>
+    <blockquote>
+        <p>
+            <strong>Rechtsgrundlage:</strong> <strong>§ 25 Abs. 1 TDDDG</strong> verbietet das Speichern von Informationen
+            auf Endgeräten ohne Einwilligung, sofern keine Ausnahme greift. Da die Anwendung keinerlei Tracking-Cookies
+            oder nicht notwendige Technologien einsetzt, besteht diesbezüglich keine Einwilligungspflicht.
+        </p>
+    </blockquote>
+
+    <hr>
+
+    <h2>7. Server-Zugriffsprotokolle (Access Logs)</h2>
+    <p>
+        Die Anwendung wird auf einem Webserver (Debian-Linux, Apache/Nginx) bereitgestellt. Der Webserver erstellt
+        <strong>automatisch Zugriffsprotokolle (Access Logs)</strong>, unabhängig von der Anwendung selbst.
+        Diese Logs enthalten typischerweise:
+    </p>
+    <ul>
+        <li>IP-Adresse des Nutzers</li>
+        <li>Datum und Uhrzeit des Zugriffs</li>
+        <li>Aufgerufene Datei/URL</li>
+        <li>HTTP-Statuscode</li>
+        <li>Übertragene Datenmenge</li>
+        <li>Browser- und Betriebssysteminformation (User-Agent)</li>
+    </ul>
+    <p>
+        IP-Adressen gelten als personenbezogene Daten im Sinne des <strong>Art. 4 Nr. 1 DSGVO</strong>
+        (vgl. EuGH, Urt. v. 19.10.2016, Az. C-582/14 – <em>Breyer</em>: auch dynamische IP-Adressen können
+        personenbezogene Daten sein).
+    </p>
+    <p>
+        Diese Logs dienen ausschließlich der Fehlerdiagnose, Sicherheit und dem Serverbetrieb und werden nicht an Dritte weitergegeben.
+    </p>
+    <blockquote>
+        <p>
+            <strong>Rechtsgrundlage:</strong> Die Verarbeitung der Zugriffsdaten erfolgt auf Basis von
+            <strong>Art. 6 Abs. 1 lit. f DSGVO</strong> (berechtigtes Interesse). Das berechtigte Interesse besteht
+            in der Gewährleistung des technischen Betriebs und der Sicherheit des Servers.
+            <strong>Erwägungsgrund 49 DSGVO</strong> bestätigt ausdrücklich, dass die Verarbeitung personenbezogener
+            Daten zur Gewährleistung der Netz- und Informationssicherheit – einschließlich der Abwehr unbefugter
+            Zugriffe – ein berechtigtes Interesse darstellt.
+        </p>
+        <p>
+            <strong>Speicherbegrenzung:</strong> Gemäß <strong>Art. 5 Abs. 1 lit. e DSGVO</strong> (Grundsatz der
+            Speicherbegrenzung) werden die Protokolldaten nur so lange aufbewahrt, wie es für den Verarbeitungszweck
+            erforderlich ist (i. d. R. 7–30 Tage, je nach Serverkonfiguration), und anschließend automatisch gelöscht.
+        </p>
+    </blockquote>
+
+    <hr>
+
+    <h2>8. Keine Datenübertragung an Dritte</h2>
+    <p>
+        Abgesehen von den serverseitigen Zugriffsprotokollen (siehe Abschnitt 7) findet <strong>keinerlei Übertragung</strong>
+        von Anwendungsdaten an Dritte statt. Es werden keine APIs aufgerufen, keine Formulardaten gesendet und keine
+        Telemetrie erhoben.
+    </p>
+
+    <hr>
+
+    <h2>9. Rechte der Nutzer</h2>
+    <p>
+        Soweit über die Zugriffsprotokolle (Abschnitt 7) personenbezogene Daten (IP-Adressen) verarbeitet werden,
+        stehen den betroffenen Personen gemäß DSGVO folgende Rechte zu:
+    </p>
+    <ul>
+        <li><strong>Auskunftsrecht</strong> – Art. 15 DSGVO: Recht auf Auskunft über gespeicherte Daten</li>
+        <li><strong>Berichtigung</strong> – Art. 16 DSGVO: Recht auf Korrektur unrichtiger Daten</li>
+        <li><strong>Löschung</strong> – Art. 17 DSGVO: Recht auf Löschung, sofern kein überwiegender Verarbeitungsgrund besteht</li>
+        <li><strong>Einschränkung</strong> – Art. 18 DSGVO: Recht auf eingeschränkte Verarbeitung</li>
+        <li><strong>Widerspruch</strong> – Art. 21 DSGVO: Recht auf Widerspruch gegen die Verarbeitung auf Basis berechtigten Interesses</li>
+    </ul>
+    <p>Für Anfragen zu diesen Rechten wenden Sie sich an den Verantwortlichen (Abschnitt 1).</p>
+    <p>
+        Alle lokal im Browser gespeicherten Daten (<code>localStorage</code>) können jederzeit eigenständig durch den
+        Nutzer gelöscht werden (z. B. über die Entwicklerkonsole des Browsers → <code>localStorage.clear()</code>).
+    </p>
+
+    <hr>
+
+    <h2>10. Hinweis zur Weiterentwicklung</h2>
+    <p>
+        Dieses Repository ist eine Demo-Version. Die Weiterentwicklung erfolgt in einem separaten privaten Repository.
+        Sollte eine produktive Version mit Serverkommunikation oder echter Nutzerverwaltung entstehen, wird eine
+        aktualisierte Datenschutzerklärung bereitgestellt.
+    </p>
+
+    <hr>
+
+    <footer>
+        Dieses Dokument gilt für die öffentliche Demo unter: https://github.com/arneklimmt/GrainStorageDemo (o. ä.)
+    </footer>
+
+</body>
+</html>
+
